@@ -1,8 +1,8 @@
-package com.wizardduels.wands;
+package net.spellboundmc.wands;
 
-import com.wizardduels.WizardDuels;
-import com.wizardduels.match.Basic1v1;
-import com.wizardduels.match.Match;
+import net.spellboundmc.WizardDuels;
+import net.spellboundmc.match.Basic1v1;
+import net.spellboundmc.match.Match;
 import io.papermc.paper.event.entity.EntityMoveEvent;
 import net.hectus.color.McColor;
 import net.hectus.util.Randomizer;

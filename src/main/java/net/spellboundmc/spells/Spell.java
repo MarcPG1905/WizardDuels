@@ -1,4 +1,4 @@
-package com.wizardduels.spells;
+package net.spellboundmc.spells;
 
 public interface Spell {
     void activate();

@@ -1,6 +1,6 @@
-package com.wizardduels.structures;
+package net.spellboundmc.structures;
 
-import com.wizardduels.WizardDuels;
+import net.spellboundmc.WizardDuels;
 import org.bukkit.Location;
 import org.jetbrains.annotations.NotNull;
 

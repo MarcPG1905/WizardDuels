@@ -1,6 +1,6 @@
-package com.wizardduels.match;
+package net.spellboundmc.match;
 
-import com.wizardduels.WizardDuels;
+import net.spellboundmc.WizardDuels;
 import net.hectus.color.McColor;
 import net.kyori.adventure.text.Component;
 import org.bukkit.command.Command;

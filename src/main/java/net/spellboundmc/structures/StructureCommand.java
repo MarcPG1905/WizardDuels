@@ -1,10 +1,7 @@
-package com.wizardduels.structures;
+package net.spellboundmc.structures;
 
 import net.hectus.text.Completer;
 import net.kyori.adventure.text.Component;
-import org.bukkit.Location;
-import org.bukkit.World;
-import org.bukkit.block.Block;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;

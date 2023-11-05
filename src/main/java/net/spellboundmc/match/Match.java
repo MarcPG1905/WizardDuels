@@ -1,4 +1,4 @@
-package com.wizardduels.match;
+package net.spellboundmc.match;
 
 public interface Match {
     void startMain();

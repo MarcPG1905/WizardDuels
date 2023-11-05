@@ -1,6 +1,6 @@
-package com.wizardduels.match;
+package net.spellboundmc.match;
 
-import com.wizardduels.WizardDuels;
+import net.spellboundmc.WizardDuels;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;

@@ -1,6 +1,6 @@
-package com.wizardduels;
+package net.spellboundmc;
 
-import com.wizardduels.match.Basic1v1;
+import net.spellboundmc.match.Basic1v1;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;

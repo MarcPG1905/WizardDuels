@@ -1,7 +1,7 @@
-package com.wizardduels.structures;
+package net.spellboundmc.structures;
 
 import com.google.gson.Gson;
-import com.wizardduels.WizardDuels;
+import net.spellboundmc.WizardDuels;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.Block;

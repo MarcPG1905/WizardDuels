@@ -1,6 +1,6 @@
-package com.wizardduels;
+package net.spellboundmc;
 
-import com.wizardduels.match.Match;
+import net.spellboundmc.match.Match;
 import net.hectus.data.time.Time;
 import net.hectus.data.time.Timer;
 import org.bukkit.Bukkit;

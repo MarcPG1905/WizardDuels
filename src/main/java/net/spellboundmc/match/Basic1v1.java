@@ -1,8 +1,8 @@
-package com.wizardduels.match;
+package net.spellboundmc.match;
 
-import com.wizardduels.WizardDuels;
-import com.wizardduels.MatchTimer;
-import com.wizardduels.ScoreboardManager;
+import net.spellboundmc.WizardDuels;
+import net.spellboundmc.MatchTimer;
+import net.spellboundmc.ScoreboardManager;
 import net.hectus.color.McColor;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;

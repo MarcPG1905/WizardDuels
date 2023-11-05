@@ -1,4 +1,4 @@
-package com.wizardduels.structures;
+package net.spellboundmc.structures;
 
 import org.bukkit.Location;
 import org.bukkit.Material;

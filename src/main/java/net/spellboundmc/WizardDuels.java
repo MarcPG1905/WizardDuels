@@ -1,11 +1,11 @@
-package com.wizardduels;
+package net.spellboundmc;
 
-import com.wizardduels.match.GiveUpCommand;
-import com.wizardduels.match.Match;
-import com.wizardduels.match.MatchCommand;
-import com.wizardduels.structures.StructureCommand;
-import com.wizardduels.structures.StructureManager;
-import com.wizardduels.wands.WandUseEvent;
+import net.spellboundmc.match.GiveUpCommand;
+import net.spellboundmc.match.Match;
+import net.spellboundmc.match.MatchCommand;
+import net.spellboundmc.structures.StructureCommand;
+import net.spellboundmc.structures.StructureManager;
+import net.spellboundmc.wands.WandUseEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.plugin.java.JavaPlugin;
