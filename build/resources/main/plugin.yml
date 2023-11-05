@@ -1,0 +1,40 @@
+### Plugin Name ###
+name: WizardDuels
+
+### Build Version ###
+version: '0.0.1-ALPHA-1.20.2'
+
+### Main Class ###
+main: com.wizardduels.WizardDuels
+
+### PaperAPI version ###
+api-version: '1.20'
+
+### Developer of the Plugin ###
+author: MarcPG1905
+
+### Our Website ###
+website: https://wizardduels.com/
+
+### Plugin Prefix ###
+prefix: WD
+
+### All Commands ###
+commands:
+  ## Start a WizardDuels™ match ##
+  match:
+    usage: /<command> <type> <player>
+    aliases: start
+
+  ## Give up ##
+  giveup:
+    usage: /<command>
+    aliases: surrender
+
+  ## Do Structure things ##
+  structure:
+    usage: /<command> <args...>
+
+######################################
+# Credits for all of the plugin code #
+############### MarcPG ###############
