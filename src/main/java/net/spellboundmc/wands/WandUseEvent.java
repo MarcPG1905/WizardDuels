@@ -1,5 +1,6 @@
 package net.spellboundmc.wands;
 
+import net.spellboundmc.Translation;
 import net.spellboundmc.WizardDuels;
 import net.spellboundmc.match.Basic1v1;
 import net.spellboundmc.match.Match;
@@ -28,6 +29,7 @@ import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.Random;
 
@@ -59,6 +61,8 @@ public class WandUseEvent implements Listener {
         World world = player.getWorld();
 
         Match match = WizardDuels.currentMatch;
+
+        Locale l = player.locale();
 
         switch (item) {
             // =========== EXPLOSION ===========
@@ -176,7 +180,7 @@ public class WandUseEvent implements Listener {
                     case RMB -> {
                         Block block = player.getTargetBlockExact(10);
                         if (block == null) {
-                            player.sendMessage(McColor.YELLOW + "You have to look at a block in a 10 block range!");
+                            player.sendMessage(McColor.YELLOW + Translation.get(l, "wand.error.range", 10));
                             return;
                         }
                         // TODO: Check if the block is inside the map
@@ -208,7 +212,7 @@ public class WandUseEvent implements Listener {
                     case LMB -> {
                         Block block = player.getTargetBlockExact(10);
                         if (block == null) {
-                            player.sendMessage(McColor.YELLOW + "You have to look at a block in a 10 block range!");
+                            player.sendMessage(McColor.YELLOW + Translation.get(l, "wand.error.range", 10));
                             return;
                         }
                         Location spawnLocation = block.getLocation().clone().add(0, 1, 0);

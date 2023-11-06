@@ -1,5 +1,6 @@
 package net.spellboundmc.match;
 
+import net.spellboundmc.Translation;
 import net.spellboundmc.WizardDuels;
 import net.spellboundmc.MatchTimer;
 import net.spellboundmc.ScoreboardManager;
@@ -8,10 +9,13 @@ import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.title.Title;
 import org.bukkit.Bukkit;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.Locale;
 
 import static net.hectus.color.McColor.*;
 
@@ -23,13 +27,11 @@ public class Basic1v1 implements Match {
 
     public final Player team1;
     public final Player team2;
-    public final Audience audience;
     public final MatchTimer timer;
 
     public Basic1v1(@NotNull Player player1, @NotNull Player player2) {
         team1 = player1;
         team2 = player2;
-        audience = player1.getWorld();
         timer = new MatchTimer(this);
 
         startMain();
@@ -52,34 +54,30 @@ public class Basic1v1 implements Match {
         team1.addPotionEffect(witherEffect);
         team2.addPotionEffect(witherEffect);
 
-        audience.sendActionBar(Component.text(BLACK + "5min left, withering is now applied"));
+        team1.getWorld().getPlayers().forEach(p -> p.sendActionBar(Component.text(Translation.get(p.locale(), "match.withering"))));
     }
 
     public void lose(Player loser) {
         Bukkit.getScheduler().runTaskLater(WizardDuels.getPlugin(WizardDuels.class), () -> {
             Player winner = loser == team1 ? team2 : team1;
+            Locale ll = loser.locale();
+            Locale wl = winner.locale();
 
-            loser.showTitle(Title.title(Component.text(RED + "You lost!"), Component.text("Better luck next time!")));
-            winner.showTitle(Title.title(Component.text(McColor.GREEN + "You won!"), Component.text("Keep it up!")));
+            loser.showTitle(Title.title(Component.text(RED + Translation.get(ll, "match.lose")), Component.text(Translation.get(ll, "match.lose.text"))));
+            loser.sendMessage(Component.text(RED + Translation.get(ll, "match.lose.chat")));
 
-            loser.sendMessage(Component.text(RED + "//=========================================================\\\\"));
-            loser.sendMessage(Component.text(RED + "|| You sadly lost this match. You'll get better next time! ||"));
-            loser.sendMessage(Component.text(RED + "\\\\=========================================================//"));
-
-            winner.sendMessage(Component.text(GREEN + "//=======================================\\\\"));
-            winner.sendMessage(Component.text(GREEN + "|| You won this match. Nice, keep it up! ||"));
-            winner.sendMessage(Component.text(GREEN + "\\\\=======================================//"));
+            winner.showTitle(Title.title(Component.text(GREEN + Translation.get(wl, "match.win")), Component.text(Translation.get(wl, "match.win.text"))));
+            winner.sendMessage(Component.text(GREEN + Translation.get(ll, "match.win.chat")));
         }, 20);
     }
 
     public void tie() {
         Bukkit.getScheduler().runTaskLater(WizardDuels.getPlugin(WizardDuels.class), () -> {
-            Audience audience = team1.getWorld();
-            audience.showTitle(Title.title(Component.text(McColor.YELLOW + "Tie!"), Component.text("It's a tie!")));
-
-            audience.sendMessage(Component.text(McColor.GREEN + "//============================\\\\"));
-            audience.sendMessage(Component.text(McColor.GREEN + "|| This match ended in a tie! ||"));
-            audience.sendMessage(Component.text(McColor.GREEN + "\\\\============================//"));
+            for (Player player : team1.getWorld().getPlayers()) {
+                Locale l = player.locale();
+                player.showTitle(Title.title(Component.text(YELLOW + Translation.get(l, "match.tie")), Component.text(Translation.get(l, "match.tie.text"))));
+                player.sendMessage(Component.text(YELLOW + Translation.get(l, "match.tie.chat")));
+            }
         }, 20);
     }
 }

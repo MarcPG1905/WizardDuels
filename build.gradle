@@ -27,8 +27,9 @@ repositories {
 }
 
 dependencies {
-    implementation 'io.papermc.paper:paper-api:1.20.2-R0.1-SNAPSHOT' // Just Paper
     implementation files('libs/HectaLib-0.0.5-PRE-ALPHA.jar') // HectaLib for some custom stuff
+    implementation 'io.papermc.paper:paper-api:1.20.2-R0.1-SNAPSHOT' // Just Paper
+    implementation 'com.opencsv:opencsv:5.8' // OpenCSV is a library for parsing CSV files
 }
 
 def targetJavaVersion = 17
