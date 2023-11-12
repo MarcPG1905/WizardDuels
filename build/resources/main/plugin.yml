@@ -5,7 +5,7 @@ name: WizardDuels
 version: '0.0.1-ALPHA-1.20.2'
 
 ### Main Class ###
-main: com.wizardduels.WizardDuels
+main: net.spellboundmc.WizardDuels
 
 ### PaperAPI version ###
 api-version: '1.20'

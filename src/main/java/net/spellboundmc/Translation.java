@@ -14,13 +14,13 @@ public class Translation {
     public static HashMap<String, String> EN_ENGLISH, DE_GERMAN, RU_RUSSIAN, UA_UKRAINIAN, LOL_LOLCAT, LA_LATIN, ES_SPAIN;
 
     public static void init() {
-        EN_ENGLISH.putAll(readCsvFile(new File(DATA_FOLDER, "en.csv")));
-        DE_GERMAN.putAll(readCsvFile(new File(DATA_FOLDER, "de.csv")));
-        RU_RUSSIAN.putAll(readCsvFile(new File(DATA_FOLDER, "ru.csv")));
-        UA_UKRAINIAN.putAll(readCsvFile(new File(DATA_FOLDER, "ua.csv")));
-        LOL_LOLCAT.putAll(readCsvFile(new File(DATA_FOLDER, "lol.csv")));
-        LA_LATIN.putAll(readCsvFile(new File(DATA_FOLDER, "la.csv")));
-        ES_SPAIN.putAll(readCsvFile(new File(DATA_FOLDER, "es.csv")));
+        EN_ENGLISH = new HashMap<>(readCsvFile(new File(DATA_FOLDER, "en.csv")));
+        DE_GERMAN = new HashMap<>(readCsvFile(new File(DATA_FOLDER, "de.csv")));
+        RU_RUSSIAN = new HashMap<>(readCsvFile(new File(DATA_FOLDER, "ru.csv")));
+        UA_UKRAINIAN = new HashMap<>(readCsvFile(new File(DATA_FOLDER, "ua.csv")));
+        LOL_LOLCAT = new HashMap<>(readCsvFile(new File(DATA_FOLDER, "lol.csv")));
+        LA_LATIN = new HashMap<>(readCsvFile(new File(DATA_FOLDER, "la.csv")));
+        ES_SPAIN = new HashMap<>(readCsvFile(new File(DATA_FOLDER, "es.csv")));
     }
 
     public static String get(Locale locale, String key) {

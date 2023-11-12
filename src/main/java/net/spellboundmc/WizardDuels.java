@@ -34,6 +34,8 @@ public final class WizardDuels extends JavaPlugin {
         DATA_FOLDER = getDataFolder();
 
         StructureManager.loadAll(false);
+
+        Translation.init();
     }
 
     @Override

@@ -5,7 +5,7 @@ name: WizardDuels
 version: '${version}'
 
 ### Main Class ###
-main: com.wizardduels.WizardDuels
+main: net.spellboundmc.WizardDuels
 
 ### PaperAPI version ###
 api-version: '1.20'

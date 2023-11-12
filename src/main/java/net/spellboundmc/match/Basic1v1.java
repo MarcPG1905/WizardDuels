@@ -1,15 +1,12 @@
 package net.spellboundmc.match;
 
-import net.spellboundmc.Translation;
-import net.spellboundmc.WizardDuels;
-import net.spellboundmc.MatchTimer;
-import net.spellboundmc.ScoreboardManager;
-import net.hectus.color.McColor;
-import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.title.Title;
+import net.spellboundmc.MatchTimer;
+import net.spellboundmc.ScoreboardManager;
+import net.spellboundmc.Translation;
+import net.spellboundmc.WizardDuels;
 import org.bukkit.Bukkit;
-import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
