@@ -3,15 +3,17 @@ package net.spellboundmc.match;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.title.Title;
 import net.spellboundmc.MatchTimer;
-import net.spellboundmc.ScoreboardManager;
+import net.spellboundmc.InformationManager;
 import net.spellboundmc.Translation;
 import net.spellboundmc.WizardDuels;
+import net.spellboundmc.wands.Ability;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.HashMap;
 import java.util.Locale;
 
 import static net.hectus.color.McColor.*;
@@ -24,12 +26,21 @@ public class Basic1v1 implements Match {
 
     public final Player team1;
     public final Player team2;
+    public final HashMap<Ability, Integer> cooldowns1 = new HashMap<>();
+    public final HashMap<Ability, Integer> cooldowns2 = new HashMap<>();
     public final MatchTimer timer;
 
     public Basic1v1(@NotNull Player player1, @NotNull Player player2) {
         team1 = player1;
         team2 = player2;
+
+        for (Ability ability : Ability.values()) {
+            cooldowns1.put(ability, 0);
+            cooldowns2.put(ability, 0);
+        }
+
         timer = new MatchTimer(this);
+
 
         startMain();
     }
@@ -37,13 +48,13 @@ public class Basic1v1 implements Match {
     @Override
     public void startMain() {
         timer.start();
-        ScoreboardManager.startBasic(this);
+        InformationManager.startBasic(this);
     }
 
     @Override
     public void stop() {
         timer.stop();
-        ScoreboardManager.stopBasic(team1, team2);
+        InformationManager.stopBasic(team1, team2);
     }
 
     @Override

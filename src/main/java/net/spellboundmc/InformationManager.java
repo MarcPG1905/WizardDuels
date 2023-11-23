@@ -1,9 +1,13 @@
 package net.spellboundmc;
 
-import net.hectus.color.McColor;
+import net.kyori.adventure.text.format.TextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import net.spellboundmc.match.Basic1v1;
 import net.kyori.adventure.text.Component;
+import net.spellboundmc.wands.Ability;
+import net.spellboundmc.wands.Wand;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.scoreboard.*;
@@ -12,18 +16,22 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import static net.hectus.color.McColor.*;
 
-public class ScoreboardManager {
-    private static final org.bukkit.scoreboard.ScoreboardManager manager = Bukkit.getScoreboardManager();
+public class InformationManager {
+    private static final ScoreboardManager manager = Bukkit.getScoreboardManager();
 
     public static BukkitTask basicScoreboard;
     public static void startBasic(Basic1v1 match) {
         basicScoreboard = Bukkit.getScheduler().runTaskTimer(WizardDuels.getPlugin(WizardDuels.class), () -> {
             updateBasic(match, true);
             updateBasic(match, false);
-        }, 0, 20);
+
+            updateActionBar(match.team1, match.cooldowns1);
+            updateActionBar(match.team2, match.cooldowns2);
+        }, 0, 5);
     }
 
     public static void updateBasic(@NotNull Basic1v1 match, boolean team1) {
@@ -58,5 +66,18 @@ public class ScoreboardManager {
         player1.setScoreboard(manager.getNewScoreboard());
         player2.setScoreboard(manager.getNewScoreboard());
         basicScoreboard.cancel();
+    }
+
+    public static void updateActionBar(@NotNull Player player, Map<Ability, Integer> cooldowns) {
+        Material mainHandItem = player.getInventory().getItemInMainHand().getType();
+        Wand wand = Wand.EXPLOSION;
+        for (Wand tempWand : Wand.values()) {
+            if (tempWand.item == mainHandItem) {
+                wand = tempWand;
+                break;
+            }
+        }
+        boolean sneak = player.isSneaking();
+        player.sendActionBar(Component.text(cooldowns.get(wand.abilities[sneak ? 2 : 0]) + "s | " + cooldowns.get(wand.abilities[sneak ? 3 : 1]) + "s", sneak ? TextColor.color(150, 180, 255) : TextColor.color(255, 255, 255), TextDecoration.ITALIC));
     }
 }
