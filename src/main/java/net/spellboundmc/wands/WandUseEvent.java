@@ -1,9 +1,10 @@
 package net.spellboundmc.wands;
 
 import io.papermc.paper.event.entity.EntityMoveEvent;
-import net.hectus.color.McColor;
-import net.hectus.util.Formatter;
+import me.marcpg1905.color.McFormat;
+import me.marcpg1905.util.Formatter;
 import net.kyori.adventure.text.Component;
+import net.spellboundmc.PlayerData;
 import net.spellboundmc.Translation;
 import net.spellboundmc.WizardDuels;
 import net.spellboundmc.match.Basic1v1;
@@ -40,16 +41,11 @@ public class WandUseEvent implements Listener {
     }
 
     public void wandUse(@NotNull Material item, UseType use, @NotNull Player player) {
-        if (player == DISABLED_WANDS) {
-            player.sendMessage(McColor.RED + Translation.get(player.locale(), "wand.error.disabled"));
-            return;
-        }
-
         if (item == Material.DIAMOND && use == UseType.SLMB) {
             PlayerInventory inv = player.getInventory();
             for (Wand wand : Wand.values()) {
                 ItemStack wandItem = new ItemStack(wand.item);
-                wandItem.editMeta(itemMeta -> itemMeta.displayName(Component.text(McColor.LIME + Formatter.toPascalCase(wand.name()) + " Wand")));
+                wandItem.editMeta(itemMeta -> itemMeta.displayName(Component.text(McFormat.LIME + Formatter.toPascalCase(wand.name()) + " Wand")));
                 inv.addItem(wandItem);
             }
         }
@@ -157,7 +153,7 @@ public class WandUseEvent implements Listener {
             // ============= SCULK =============
             case DIAMOND_AXE -> {
                 switch (use) {
-                    case LMB -> WandUsage.wandUse(Ability.SHRIEK, player);
+                    case LMB -> WandUsage.wandUse(Ability.SONIC_BOOM, player);
                     case RMB -> WandUsage.wandUse(Ability.SCULK_TELEPORT, player);
                     case SLMB -> WandUsage.wandUse(Ability.WARDEN, player);
                     case SRMB -> WandUsage.wandUse(Ability.SCULK_GROWTH, player);
@@ -234,7 +230,7 @@ public class WandUseEvent implements Listener {
             if (!skeleton.getScoreboardTags().contains("venomous")) return;
 
             Basic1v1 basic1v1 = (Basic1v1) WizardDuels.currentMatch; // TODO: Switch this to be compatible with 2v2 and Chaos too
-            Player target = basic1v1.team1 == POISON_SKELETONS ? basic1v1.team1 : basic1v1.team2;
+            Player target = basic1v1.player1 == POISON_SKELETONS ? basic1v1.player1 : basic1v1.player2;
 
             if (event.getTarget() == POISON_SKELETONS) event.setTarget(target);
         }
@@ -261,11 +257,14 @@ public class WandUseEvent implements Listener {
         if (FIRE_RING != null) {
             Location loc = FIRE_RING.getLocation();
 
+            Basic1v1 basic1v1 = (Basic1v1) WizardDuels.currentMatch;
+            PlayerData playerData = basic1v1.player1 == FIRE_RING ? basic1v1.playerData1 : basic1v1.playerData2;
+
             if (FIRE_RING == event.getPlayer()) {
                 for (int i = 0; i < 360; i += 3) {
                     double angle = Math.toRadians(i);
-                    double x = loc.getX() + (BOOSTED_ABILITIES == FIRE_RING ? 15 : 10) * Math.cos(angle);
-                    double z = loc.getZ() + (BOOSTED_ABILITIES == FIRE_RING ? 15 : 10) * Math.sin(angle);
+                    double x = loc.getX() + (playerData.boostedAbilities ? 15 : 10) * Math.cos(angle);
+                    double z = loc.getZ() + (playerData.boostedAbilities ? 15 : 10) * Math.sin(angle);
                     Location particleLocation = new Location(WizardDuels.WORLD, x, loc.getY(), z);
 
                     WizardDuels.WORLD.spawnParticle(Particle.REDSTONE, particleLocation, 0, new Particle.DustOptions(Color.RED, 1));
@@ -273,7 +272,7 @@ public class WandUseEvent implements Listener {
             }
 
             for (Player target : Bukkit.getOnlinePlayers()) {
-                if (target != FIRE_RING && loc.distance(target.getLocation()) <= (BOOSTED_ABILITIES == FIRE_RING ? 15 : 10)) {
+                if (target != FIRE_RING && loc.distance(target.getLocation()) <= (playerData.boostedAbilities ? 15 : 10)) {
                     target.setFireTicks(100);
                     target.damage(0.5);
                 }
@@ -371,18 +370,28 @@ public class WandUseEvent implements Listener {
     }
 
     @EventHandler
-    public void onEntityDeath(EntityDeathEvent event) {
-        if (CRYSTAL_ACTIVE) {
-            if (event.getEntity() instanceof EnderCrystal) {
-                CRYSTAL_ACTIVE = false;
-                event.getDrops().clear();
+    public void onEntityDeath(@NotNull EntityDeathEvent event) {
+        Basic1v1 basic1v1 = (Basic1v1) WizardDuels.currentMatch;
+        if (event.getEntity() instanceof EnderCrystal) {
+            event.getDrops().clear();
+            if (basic1v1.playerData1.wandCrystalActive || basic1v1.playerData2.wandCrystalActive) {
+                basic1v1.playerData1.wandCrystalActive = false;
+                basic1v1.playerData2.wandCrystalActive = false;
 
                 for (Player player : WizardDuels.WORLD.getPlayers()) {
                     if (player.getNoDamageTicks() != 0 && player.getInventory().contains(Material.NETHERITE_SHOVEL)) {
                         player.setNoDamageTicks(1);
-                        player.sendMessage(McColor.RED + Translation.get(player.locale(), "wand.dragon.srmb.end"));
+                        player.sendMessage(McFormat.RED + Translation.get(player.locale(), "wand.dragon.srmb.end"));
                     }
                 }
+            }
+            if (basic1v1.playerData1.spellCrystalActive) {
+                basic1v1.player1.setHealth(basic1v1.player1.getHealth() + 10);
+                basic1v1.playerData1.spellCooldowns.put(Material.END_CRYSTAL, 35);
+            }
+            if (basic1v1.playerData2.spellCrystalActive) {
+                basic1v1.player2.setHealth(basic1v1.player2.getHealth() + 10);
+                basic1v1.playerData2.spellCooldowns.put(Material.END_CRYSTAL, 35);
             }
         }
         if (event.getEntity().getType() == EntityType.SKELETON) {

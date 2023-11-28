@@ -1,20 +1,13 @@
 package net.spellboundmc;
 
-import net.hectus.color.McColor;
-import net.hectus.data.time.Time;
-import net.hectus.data.time.Timer;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.TextColor;
-import net.kyori.adventure.text.format.TextDecoration;
+import me.marcpg1905.data.time.Time;
+import me.marcpg1905.data.time.Timer;
 import net.spellboundmc.match.Basic1v1;
 import net.spellboundmc.match.Match;
 import net.spellboundmc.wands.Ability;
-import net.spellboundmc.wands.Wand;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -35,8 +28,18 @@ public class MatchTimer implements Timer {
             time.decrement();
 
             if (match instanceof Basic1v1 basic1v1) {
-                cooldown(basic1v1.cooldowns1);
-                cooldown(basic1v1.cooldowns2);
+                cooldown(basic1v1.playerData1.abilityCooldowns);
+                cooldown(basic1v1.playerData1.spellCooldowns);
+
+                cooldown(basic1v1.playerData2.abilityCooldowns);
+                cooldown(basic1v1.playerData2.spellCooldowns);
+
+                if (basic1v1.playerData1.spellCrystalActive) {
+                    basic1v1.player1.setHealth(basic1v1.player1.getHealth() + 1);
+                }
+                if (basic1v1.playerData2.spellCrystalActive) {
+                    basic1v1.player2.setHealth(basic1v1.player2.getHealth() + 1);
+                }
             }
 
             if (time.getAs(Time.Unit.MINUTES) == 5) match.withering();
@@ -60,9 +63,9 @@ public class MatchTimer implements Timer {
         return new Time(480 - time.getAs(Time.Unit.SECONDS));
     }
 
-    public static void cooldown(Map<Ability, Integer> cooldowns) {
-        HashMap<Ability, Integer> newMap = new HashMap<>();
-        for (Map.Entry<Ability, Integer> entry : cooldowns.entrySet()) {
+    public static <T> void cooldown(Map<T, Integer> cooldowns) {
+        HashMap<T, Integer> newMap = new HashMap<>();
+        for (Map.Entry<T, Integer> entry : cooldowns.entrySet()) {
             newMap.put(entry.getKey(), entry.getValue() - 1);
         }
         cooldowns.clear();

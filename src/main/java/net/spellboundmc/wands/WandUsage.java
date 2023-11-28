@@ -1,15 +1,15 @@
 package net.spellboundmc.wands;
 
 import com.destroystokyo.paper.ParticleBuilder;
-import net.hectus.color.McColor;
-import net.hectus.util.Randomizer;
+import me.marcpg1905.color.McFormat;
+import me.marcpg1905.util.Randomizer;
 import net.kyori.adventure.sound.SoundStop;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.title.Title;
+import net.spellboundmc.PlayerData;
 import net.spellboundmc.Translation;
 import net.spellboundmc.WizardDuels;
 import net.spellboundmc.match.Basic1v1;
-import net.spellboundmc.match.Match;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -22,6 +22,7 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Vector;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.Duration;
@@ -34,42 +35,34 @@ import static org.bukkit.block.BlockFace.*;
 import static org.bukkit.entity.EntityType.*;
 
 public class WandUsage {
-    public static final Random RANDOM = new Random();
-    public static boolean CRYSTAL_ACTIVE = false;
     public static final List<Class<? extends Entity>> NECROMANCER_WAND_CREATURES = List.of(Zombie.class, Skeleton.class, Spider.class, Silverfish.class, Witch.class, Pillager.class, Guardian.class);
     public static final List<EntityType> NECROMANCER_WAND_CREATURE_TYPES = List.of(ZOMBIE, SKELETON, SPIDER, SILVERFISH, WITCH, PILLAGER, GUARDIAN);
-    public static Player ICE_STORM, FIRE_RING, STORM_WALL, ICY_FEET, OPPONENTS_NO_MOVEMENT, TORNADO, POISON_SKELETONS, DISABLED_WANDS, BOOSTED_ABILITIES, NO_GRAVITATION;
-    public static final Map<Material, Integer> SWORDS = Map.of(
-            Material.IRON_SWORD, 30,
-            Material.GOLDEN_SWORD, 30,
-            Material.DIAMOND_SWORD, 25,
-            Material.NETHERITE_SWORD, 10,
-            Material.BOOK, 5
-    );
+    public static final Map<Material, Integer> SWORDS = Map.of(Material.IRON_SWORD, 30, Material.GOLDEN_SWORD, 30, Material.DIAMOND_SWORD, 25, Material.NETHERITE_SWORD, 10, Material.BOOK, 5);
+    public static final Random RANDOM = new Random();
+    public static Player ICE_STORM, FIRE_RING, STORM_WALL, ICY_FEET, OPPONENTS_NO_MOVEMENT, TORNADO, POISON_SKELETONS, NO_GRAVITATION;
 
     public static void wandUse(Ability ability, @NotNull Player player) {
         Locale l = player.locale();
-
-        if (player == DISABLED_WANDS) {
-            player.sendMessage(McColor.RED + Translation.get(l, "wand.error.disabled"));
-            return;
-        }
-
         Location loc = player.getLocation();
         World world = player.getWorld();
 
-        Match match = WizardDuels.currentMatch;
-        Basic1v1 basic1v1 = (Basic1v1) match; // TODO: Switch this to be compatible with 2v2 and Chaos too
-        Player target = basic1v1.team1 == player ? basic1v1.team2 : basic1v1.team1;
+        Basic1v1 basic1v1 = (Basic1v1) WizardDuels.currentMatch;
 
-        HashMap<Ability, Integer> map = basic1v1.team1 == player ? basic1v1.cooldowns1 : basic1v1.cooldowns2;
-        if (map.get(ability) >= 0) {
+        PlayerData playerData = basic1v1.player1 == player ? basic1v1.playerData1 : basic1v1.playerData2;
+        PlayerData opponentData = basic1v1.player1 == player ? basic1v1.playerData2 : basic1v1.playerData1;
+
+        if (playerData.disabledWands) {
+            player.sendMessage(McFormat.RED + Translation.get(l, "wand.error.disabled"));
+            return;
+        }
+
+        if (playerData.abilityCooldowns.get(ability) >= 0) {
             player.playSound(loc, Sound.ENTITY_VILLAGER_NO, 0.25f, 1.0f);
             player.sendMessage("You're using your abilities too fast, cool down!");
             return;
         }
 
-        map.put(ability, ability.cooldown);
+        playerData.abilityCooldowns.put(ability, ability.cooldown);
 
         switch (ability) {
             // =========== EXPLOSION ===========
@@ -81,19 +74,19 @@ public class WandUsage {
                 player.playSound(loc, Sound.ENTITY_GENERIC_EXPLODE, 1.0f, 1.0f);
 
                 Vector velocity = player.getVelocity();
-                double launchVelocityY = Math.sqrt(b(player, 1, 2) * 2 * 0.08 * 15.0 * ((velocity.getY() / 2) + 1));
+                double launchVelocityY = Math.sqrt(b(playerData, 1, 2) * 2 * 0.08 * 15.0 * ((velocity.getY() / 2) + 1));
 
                 player.setVelocity(new Vector(velocity.getX(), launchVelocityY, velocity.getZ()));
             }
             case CREEPER_THROW -> {
                 player.playSound(loc, Sound.ENTITY_CREEPER_HURT, 1.0f, 1.0f);
                 Creeper creeper = player.getWorld().spawn(loc, Creeper.class);
-                creeper.setVelocity(player.getEyeLocation().getDirection().normalize().multiply(b(player, 2.5, 4)));
+                creeper.setVelocity(player.getEyeLocation().getDirection().normalize().multiply(b(playerData, 2.5, 4)));
             }
             case SUPER_BLAST -> {
                 for (int i = 0; i < 360; i += 5) {
                     double angle = Math.toRadians(i);
-                    double radius = b(player, 2, 3);
+                    double radius = b(playerData, 2, 3);
                     double x = loc.getX() + Math.cos(angle) * radius;
                     double z = loc.getZ() + Math.sin(angle) * radius;
                     Location particleLocation = new Location(world, x, loc.getY(), z);
@@ -111,13 +104,13 @@ public class WandUsage {
                 }
 
                 Bukkit.getScheduler().runTaskLater(WizardDuels.getPlugin(WizardDuels.class), () -> {
-                    int size = b(player, 2, 3);
+                    int size = b(playerData, 2, 3);
 
                     for (int x = -size; x <= (size - 1); x++) {
                         for (int z = -size; z <= (size - 1); z++) {
                             Location tntLocation = loc.clone().add(x, 0, z);
                             TNTPrimed tnt = world.spawn(tntLocation, TNTPrimed.class);
-                            tnt.setFuseTicks(b(player, 2, 3));
+                            tnt.setFuseTicks(b(playerData, 2, 3));
                         }
                     }
                 }, 60);
@@ -128,23 +121,23 @@ public class WandUsage {
                 player.playSound(loc, Sound.BLOCK_SNOW_PLACE, 1.5f, 2.5f);
 
                 Location playerLocation = player.getEyeLocation();
-                for (int i = 1; i <= b(player, 10, 20); i++) {
+                for (int i = 1; i <= b(playerData, 10, 20); i++) {
                     Location spawnLocation = playerLocation.clone().add(playerLocation.getDirection().multiply(i / 2 + 3));
                     EvokerFangs evokerFang = world.spawn(spawnLocation, EvokerFangs.class);
                     evokerFang.setOwner(player);
                 }
                 player.stopSound(SoundStop.named(Sound.ENTITY_EVOKER_FANGS_ATTACK));
-                target.stopSound(SoundStop.named(Sound.ENTITY_EVOKER_FANGS_ATTACK));
+                opponentData.player.stopSound(SoundStop.named(Sound.ENTITY_EVOKER_FANGS_ATTACK));
             }
             case ICE_ROAD -> {
                 ICY_FEET = player;
-                player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, b(player, 200, 400), 1));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, b(playerData, 200, 400), 1));
 
                 Bukkit.getScheduler().runTaskLater(WizardDuels.getPlugin(WizardDuels.class), () -> ICY_FEET = null, 200L);
             }
             case FREEZE -> {
                 OPPONENTS_NO_MOVEMENT = player;
-                Bukkit.getScheduler().runTaskLater(WizardDuels.getPlugin(WizardDuels.class), () -> OPPONENTS_NO_MOVEMENT = null, b(player, 100, 200));
+                Bukkit.getScheduler().runTaskLater(WizardDuels.getPlugin(WizardDuels.class), () -> OPPONENTS_NO_MOVEMENT = null, b(playerData, 100, 200));
             }
             case ICE_STORM -> {
                 ICE_STORM = player;
@@ -180,9 +173,9 @@ public class WandUsage {
             case ENDERMAN_TELEPORT -> {
                 player.playSound(loc, Sound.ENTITY_ENDERMAN_TELEPORT, 0.8f, 0.8f);
 
-                Block block = player.getTargetBlockExact(b(player, 10, 20));
+                Block block = player.getTargetBlockExact(b(playerData, 10, 20));
                 if (block == null) {
-                    player.sendMessage(McColor.YELLOW + Translation.get(l, "wand.error.range", b(player, 10, 20)));
+                    player.sendMessage(McFormat.YELLOW + Translation.get(l, "wand.error.range", b(playerData, 10, 20)));
                     return;
                 }
                 // TODO: Check if the block is inside the map
@@ -207,18 +200,18 @@ public class WandUsage {
                 }
             }
             case POSITION_SWAP -> {
-                Location location1 = basic1v1.team1.getLocation();
-                basic1v1.team1.teleport(basic1v1.team2);
-                basic1v1.team1.playSound(basic1v1.team1, Sound.ENTITY_ENDERMAN_TELEPORT, 1.0f, 1.0f);
-                basic1v1.team2.teleport(location1);
-                basic1v1.team2.playSound(basic1v1.team2, Sound.ENTITY_ENDERMAN_TELEPORT, 1.0f, 1.0f);
+                Location location1 = basic1v1.player1.getLocation();
+                basic1v1.player1.teleport(basic1v1.player2);
+                basic1v1.player1.playSound(basic1v1.player1, Sound.ENTITY_ENDERMAN_TELEPORT, 1.0f, 1.0f);
+                basic1v1.player2.teleport(location1);
+                basic1v1.player2.playSound(basic1v1.player2, Sound.ENTITY_ENDERMAN_TELEPORT, 1.0f, 1.0f);
             }
 
             // ============ DRAGON =============
             case DRAGONS_BREATH -> {
-                Block block = player.getTargetBlockExact(b(player, 10, 20));
+                Block block = player.getTargetBlockExact(b(playerData, 10, 20));
                 if (block == null) {
-                    player.sendMessage(McColor.YELLOW + Translation.get(l, "wand.error.range", b(player, 10, 20)));
+                    player.sendMessage(McFormat.YELLOW + Translation.get(l, "wand.error.range", b(playerData, 10, 20)));
                     return;
                 }
                 Location spawnLocation = block.getLocation().clone().add(0, 1, 0);
@@ -243,16 +236,16 @@ public class WandUsage {
                     player.setAllowFlight(false);
                     player.setNoDamageTicks(40);
                     player.getInventory().setChestplate(null);
-                }, b(player, 120, 240));
+                }, b(playerData, 120, 240));
             }
             case DRAGON -> {
                 EnderDragon dragon = world.spawn(player.getLocation(), EnderDragon.class);
-                dragon.setTarget(target);
+                dragon.setTarget(opponentData.player);
 
                 new BukkitRunnable() {
                     @Override
                     public void run() {
-                        if (dragon.getLocation().distance(target.getLocation()) < 2.0) {
+                        if (dragon.getLocation().distance(opponentData.player.getLocation()) < 2.0) {
                             dragon.remove();
                             cancel();
                         }
@@ -260,9 +253,9 @@ public class WandUsage {
                 }.runTaskTimer(WizardDuels.getPlugin(WizardDuels.class), 0, 2);
             }
             case CRYSTAL_SHIELD -> {
-                Location randomLocation = getRandomLocation(loc, b(player, 10, 15));
+                Location randomLocation = getRandomLocation(loc, b(playerData, 10, 15));
                 world.spawn(randomLocation, EnderCrystal.class);
-                CRYSTAL_ACTIVE = true;
+                playerData.wandCrystalActive = true;
                 player.setNoDamageTicks(99999);
             }
 
@@ -271,7 +264,7 @@ public class WandUsage {
                 player.playSound(loc, Sound.ENTITY_VEX_CHARGE, 1.0f, 1.0f);
 
                 Entity entity = player.getWorld().spawn(loc, NECROMANCER_WAND_CREATURES.get(RANDOM.nextInt(NECROMANCER_WAND_CREATURES.size())));
-                entity.setVelocity(player.getEyeLocation().getDirection().normalize().multiply(b(player, 2.5, 4)));
+                entity.setVelocity(player.getEyeLocation().getDirection().normalize().multiply(b(playerData, 2.5, 4)));
             }
             case HORSEMAN -> {
                 player.playSound(loc, Sound.ENTITY_HORSE_ANGRY, 1.5f, 1.2f);
@@ -279,7 +272,7 @@ public class WandUsage {
                 Horse horse = world.spawn(loc, Horse.class);
                 horse.getInventory().setArmor(new ItemStack(Material.DIAMOND_HORSE_ARMOR));
                 horse.getInventory().setSaddle(new ItemStack(Material.SADDLE));
-                horse.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, -1, b(player, 2, 5)));
+                horse.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, -1, b(playerData, 2, 5)));
                 horse.setOwner(player);
                 horse.addPassenger(player);
             }
@@ -289,7 +282,7 @@ public class WandUsage {
                 boolean bool = RANDOM.nextBoolean();
                 Class<? extends Entity> mob = bool ? Zombie.class : Skeleton.class;
 
-                for (int i = 0; i < b(player, 5, 8); i++) {
+                for (int i = 0; i < b(playerData, 5, 8); i++) {
                     Monster entity = (Monster) world.spawn(loc, mob);
                     entity.getEquipment().setHelmet(new ItemStack(Material.NETHERITE_HELMET));
                     entity.getEquipment().setChestplate(new ItemStack(Material.NETHERITE_CHESTPLATE));
@@ -297,7 +290,7 @@ public class WandUsage {
                     entity.getEquipment().setBoots(new ItemStack(Material.NETHERITE_BOOTS));
                     entity.getEquipment().setItemInMainHand(new ItemStack(bool ? Material.IRON_SWORD : Material.BOW));
 
-                    entity.setVelocity(player.getEyeLocation().getDirection().normalize().multiply(b(player, 2.5, 4)));
+                    entity.setVelocity(player.getEyeLocation().getDirection().normalize().multiply(b(playerData, 2.5, 4)));
                 }
             }
             case SPAWNER -> {
@@ -326,7 +319,7 @@ public class WandUsage {
             case HOT_BREATH -> {
                 player.playSound(loc, Sound.ENTITY_GHAST_SCREAM, 1.0f, 1.0f);
                 new BukkitRunnable() {
-                    int secsLeft = RANDOM.nextInt(6, 11) * b(player, 1, 2);
+                    int secsLeft = RANDOM.nextInt(6, 11) * b(playerData, 1, 2);
                     @Override
                     public void run() {
                         player.launchProjectile(Fireball.class);
@@ -334,20 +327,20 @@ public class WandUsage {
                         secsLeft--;
                         if (secsLeft == 0) cancel();
                     }
-                }.runTaskTimer(WizardDuels.getPlugin(WizardDuels.class), 0, b(player, 20, 15));
+                }.runTaskTimer(WizardDuels.getPlugin(WizardDuels.class), 0, b(playerData, 20, 15));
             }
             case FIRE_RING -> {
                 player.playSound(loc, Sound.ITEM_FLINTANDSTEEL_USE, 1.5f, 1.0f);
                 FIRE_RING = player;
-                Bukkit.getScheduler().runTaskLater(WizardDuels.getPlugin(WizardDuels.class), () -> FIRE_RING = null, b(player, 200, 300));
+                Bukkit.getScheduler().runTaskLater(WizardDuels.getPlugin(WizardDuels.class), () -> FIRE_RING = null, b(playerData, 200, 300));
             }
 
             // ============ WEATHER ============
-            case LIGHTNING_STRIKE -> world.strikeLightning(target.getLocation());
+            case LIGHTNING_STRIKE -> world.strikeLightning(opponentData.player.getLocation());
             case GUST_OF_WIND -> {
                 player.playSound(player, Sound.AMBIENT_UNDERWATER_ENTER, 1.2f, 1.0f);
                 Vector direction = player.getLocation().getDirection().normalize();
-                player.setVelocity(new Vector(direction.getX(), 0.6, direction.getZ()).multiply(b(player, 2, 3)));
+                player.setVelocity(new Vector(direction.getX(), 0.6, direction.getZ()).multiply(b(playerData, 2, 3)));
             }
             case STORM_SHIELD -> {
                         /*
@@ -427,8 +420,8 @@ public class WandUsage {
                 player.playSound(loc, Sound.ENTITY_RAVAGER_ATTACK, 2.0f, 1.0f);
 
                 generateParticleBeam(player, 20, new ParticleBuilder(Particle.REDSTONE).color(0, 0, 0).count(3), true, null, null, hitPlayer -> {
-                    hitPlayer.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, b(player, 200, 300), 127, true, false));
-                    hitPlayer.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, b(player, 200, 300), 255, true, false));
+                    hitPlayer.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, b(playerData, 200, 300), 127, true, false));
+                    hitPlayer.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, b(playerData, 200, 300), 255, true, false));
                 });
             }
             case LOW_GRAVITY -> {
@@ -439,12 +432,12 @@ public class WandUsage {
                     player.setGravity(true);
                     NO_GRAVITATION = null;
                     player.setNoDamageTicks(40);
-                }, b(player, 200, 300));
+                }, b(playerData, 200, 300));
             }
             case GRAVI_WAVE -> {
                 player.playSound(loc, Sound.ENTITY_RAVAGER_STUNNED, 1.0f, 1.0f);
 
-                for (int radius = 1; radius <= b(player, 10.2, 15.4); radius++) {
+                for (int radius = 1; radius <= b(playerData, 10.2, 15.4); radius++) {
                     for (int angle = 0; angle < 360; angle += 5) {
                         double radians = Math.toRadians(angle);
                         double x = loc.getX() + radius * Math.cos(radians);
@@ -458,7 +451,7 @@ public class WandUsage {
                 }
 
                 for (Player p : Bukkit.getOnlinePlayers()) {
-                    if (p != player && loc.distance(p.getLocation()) <= b(player, 10, 15)) {
+                    if (p != player && loc.distance(p.getLocation()) <= b(playerData, 10, 15)) {
                         Vector direction = p.getLocation().toVector().subtract(loc.toVector()).normalize();
                         p.setVelocity(direction.multiply(1.5));
                     }
@@ -490,7 +483,7 @@ public class WandUsage {
             }
             case SWORD_DASH -> {
                 Vector direction = player.getLocation().getDirection().normalize();
-                player.setVelocity(new Vector(direction.getX(), 0.05, direction.getZ()).multiply(b(player, 1, 1.5)));
+                player.setVelocity(new Vector(direction.getX(), 0.05, direction.getZ()).multiply(b(playerData, 1, 1.5)));
 
                 Vector perpendicular = new Vector(-direction.getZ(), 0.15, direction.getX()).normalize();
 
@@ -521,16 +514,16 @@ public class WandUsage {
                 Snowball ball = player.launchProjectile(Snowball.class);
                 ball.setItem(sword);
 
-                ball.teleport(target.getLocation().add(0, 2, 0));
+                ball.teleport(opponentData.player.getLocation().add(0, 2, 0));
                 Vector velocity = new Vector(0, -0.1, 0);
                 ball.setVelocity(velocity);
             }
             case SWORD_HORDE -> {
                 // TODO: Add the factor of the wand level
 
-                for (int i = 0; i < b(player, 6, 10); i++) {
-                    Monster entity = world.spawn(loc, (Class<? extends Monster>) (i > b(player, 3, 5) ? Skeleton.class : Zombie.class));
-                    entity.setVelocity(player.getEyeLocation().getDirection().normalize().multiply(b(player, 2.5, 3)));
+                for (int i = 0; i < b(playerData, 6, 10); i++) {
+                    Monster entity = world.spawn(loc, (Class<? extends Monster>) (i > b(playerData, 3, 5) ? Skeleton.class : Zombie.class));
+                    entity.setVelocity(player.getEyeLocation().getDirection().normalize().multiply(b(playerData, 2.5, 3)));
                 }
             }
 
@@ -544,7 +537,7 @@ public class WandUsage {
                     world.spawn(getRandomLocation(lightning, 1), LightningStrike.class);
                 }, 20L);
             }
-            case SPEEDY_OVERCHARGE -> player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, b(player, 400, 600), 2));
+            case SPEEDY_OVERCHARGE -> player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, b(playerData, 400, 600), 2));
             case ELECTRIC_ZONE -> new BukkitRunnable() {
                 double angle = 0;
                 int duration = 0;
@@ -568,26 +561,26 @@ public class WandUsage {
 
                     angle += Math.toRadians(3);
                     duration++;
-                    if (duration >= b(player, 200, 300)) cancel();
+                    if (duration >= b(playerData, 200, 300)) cancel();
                 }
             }.runTaskTimer(WizardDuels.getPlugin(WizardDuels.class), 0, 1);
             case ELECTRO_PHANTOMS -> {
-                for (int i = 0; i < b(player, 3, 6); i++) {
+                for (int i = 0; i < b(playerData, 3, 6); i++) {
                     Phantom phantom = world.spawn(loc, Phantom.class);
-                    phantom.setTarget(target);
+                    phantom.setTarget(opponentData.player);
                 }
             }
 
             // ============= SCULK =============
-            case SHRIEK -> generateParticleBeam(player, 8, new ParticleBuilder(Particle.SONIC_BOOM), false, null, entity -> entity.damage(2.0), null);
+            case SONIC_BOOM -> generateParticleBeam(player, 8, new ParticleBuilder(Particle.SONIC_BOOM), false, null, entity -> entity.damage(2.0), null);
             case SCULK_TELEPORT -> {
                 Block block = player.getTargetBlockExact(99);
                 if (block == null) {
-                    player.sendMessage(McColor.YELLOW + Translation.get(l, "wand.error.range", 99));
+                    player.sendMessage(McFormat.YELLOW + Translation.get(l, "wand.error.range", 99));
                     return;
                 }
                 if (!block.getType().name().contains("SCULK")) {
-                    player.sendMessage(McColor.YELLOW + Translation.get(l, "wand.sculk.rmb.error"));
+                    player.sendMessage(McFormat.YELLOW + Translation.get(l, "wand.sculk.rmb.error"));
                     return;
                 }
                 // TODO: Check if the block is inside the map
@@ -596,8 +589,8 @@ public class WandUsage {
             case WARDEN -> {
                 Warden warden = world.spawn(getRandomLocation(loc, 10), Warden.class);
                 warden.setHealth(50);
-                warden.setTarget(target);
-                warden.setAnger(target, 100);
+                warden.setTarget(opponentData.player);
+                warden.setAnger(opponentData.player, 100);
             }
             case SCULK_GROWTH -> {
                 final List<BlockFace> blockFaces = List.of(UP, DOWN, NORTH, EAST, SOUTH, WEST);
@@ -638,9 +631,9 @@ public class WandUsage {
             }
 
             // ============= VENOM =============
-            case POISON -> target.addPotionEffect(new PotionEffect(PotionEffectType.POISON, 100, 1));
+            case POISON -> opponentData.player.addPotionEffect(new PotionEffect(PotionEffectType.POISON, 100, 1));
             case POISON_TELEPORT -> {
-                LivingEntity closest = target;
+                LivingEntity closest = opponentData.player;
                 for (LivingEntity entity : world.getLivingEntities()) {
                     if (entity.hasPotionEffect(PotionEffectType.POISON)) {
                         if (entity.getLocation().distance(loc) < closest.getLocation().distance(loc)) {
@@ -649,7 +642,7 @@ public class WandUsage {
                     }
                 }
                 if (!closest.hasPotionEffect(PotionEffectType.POISON)) {
-                    player.sendMessage(McColor.YELLOW + Translation.get(l, "wand.venom.rmb.error"));
+                    player.sendMessage(McFormat.YELLOW + Translation.get(l, "wand.venom.rmb.error"));
                     return;
                 }
                 player.teleport(closest);
@@ -674,7 +667,7 @@ public class WandUsage {
                     skeleton.getEquipment().setLeggings(new ItemStack(Material.IRON_LEGGINGS));
                     skeleton.getEquipment().setBoots(new ItemStack(Material.IRON_BOOTS));
                     skeleton.addScoreboardTag("venomous");
-                    skeleton.setTarget(target);
+                    skeleton.setTarget(opponentData.player);
                 }
                 POISON_SKELETONS = player;
 
@@ -714,7 +707,7 @@ public class WandUsage {
                     hitEntity.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 40, 5));
                 }
             }
-            case BLINDER -> target.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 140, 5));
+            case BLINDER -> opponentData.player.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 140, 5));
             case BLACK_DEATH -> {
                 Location spawnLoc = loc.clone();
 
@@ -747,7 +740,7 @@ public class WandUsage {
             case HEALTH_SHIELD -> player.setNoDamageTicks(200);
             case LIFE_STEAL -> {
                 int fin = specialRandom10();
-                target.damage(fin);
+                opponentData.player.damage(fin);
                 player.setHealth(player.getHealth() + fin);
             }
 
@@ -756,10 +749,10 @@ public class WandUsage {
                 if (Randomizer.boolByChance(80)) {
                     List<Ability> abilities = new ArrayList<>(Arrays.stream(Ability.values()).toList());
                     abilities.remove(Ability.GLITCH);
-                    wandUse((Ability) Randomizer.fromCollection(abilities), player);
+                    wandUse(Randomizer.fromCollection(abilities), player);
                 } else {
                     player.playSound(player, Sound.BLOCK_GLASS_BREAK, 0.5f, 0.8f);
-                    player.sendMessage(McColor.YELLOW + Translation.get(l, "wand.glitch.lmb.fail"));
+                    player.sendMessage(McFormat.YELLOW + Translation.get(l, "wand.glitch.lmb.fail"));
                 }
             }
             case GLITCH_DASH -> {
@@ -775,11 +768,11 @@ public class WandUsage {
             }
             case VIRUS -> {
                 int seconds = specialRandom10();
-                DISABLED_WANDS = target;
-                target.showTitle(Title.title(Component.empty(), Component.text(McColor.RED + Translation.get(l, "wand.glitch.slmb.opponent_title", seconds)), Title.Times.times(Duration.ZERO, Duration.ofSeconds(seconds / 2), Duration.ZERO)));
+                opponentData.disabledWands = true;
+                opponentData.player.showTitle(Title.title(Component.empty(), Component.text(McFormat.RED + Translation.get(l, "wand.glitch.slmb.opponent_title", seconds)), Title.Times.times(Duration.ZERO, Duration.ofSeconds(seconds / 2), Duration.ZERO)));
                 Bukkit.getScheduler().runTaskLater(WizardDuels.getPlugin(WizardDuels.class), () -> {
-                    DISABLED_WANDS = null;
-                    target.sendMessage(McColor.GREEN + Translation.get(l, "wand.glitch.slmb.opponent_end"));
+                    opponentData.disabledWands = false;
+                    opponentData.player.sendMessage(McFormat.GREEN + Translation.get(l, "wand.glitch.slmb.opponent_end"));
                 }, seconds * 20L);
             }
             case GLITCH_SUMMON -> {
@@ -787,7 +780,7 @@ public class WandUsage {
             }
 
             // ============ WIZARDS ============
-            case WIZ_BLAST -> generateParticleBeam(player, 80, new ParticleBuilder((Particle) Randomizer.fromArray(Particle.values())), true, block -> {
+            case WIZ_BLAST -> generateParticleBeam(player, 80, new ParticleBuilder(Randomizer.fromArray(Particle.values())), true, block -> {
                         block.setType(Material.AIR);
                         TNTPrimed tnt = world.spawn(block.getLocation(), TNTPrimed.class);
                         tnt.setFuseTicks(1);
@@ -798,7 +791,7 @@ public class WandUsage {
 
                 Block block = player.getTargetBlockExact(10);
                 if (block == null) {
-                    player.sendMessage(McColor.YELLOW + Translation.get(l, "wand.error.range", 10));
+                    player.sendMessage(McFormat.YELLOW + Translation.get(l, "wand.error.range", 10));
                     return;
                 }
                 // TODO: Check if the block is inside the map
@@ -809,11 +802,11 @@ public class WandUsage {
             case NECROMANCER -> {
                 Class<? extends Entity> entityClass;
 
-                do entityClass = ((EntityType) Randomizer.fromArray(EntityType.values())).getEntityClass();
+                do entityClass = Randomizer.fromArray(EntityType.values()).getEntityClass();
                 while (entityClass == null || !Monster.class.isAssignableFrom(entityClass));
 
                 Monster monster = (Monster) world.spawn(getRandomLocation(loc, 4), entityClass);
-                monster.setTarget(target);
+                monster.setTarget(opponentData.player);
                 monster.setHealth(monster.getHealth() * 1.5);
                 monster.addPotionEffect(new PotionEffect(PotionEffectType.INCREASE_DAMAGE, -1, 2, true, false));
             }
@@ -821,8 +814,8 @@ public class WandUsage {
                 TNTPrimed tnt = world.spawn(block.getLocation(), TNTPrimed.class);
                 tnt.setFuseTicks(1);
             }, hitEntity -> hitEntity.setNoActionTicks(200), hitPlayer -> {
-                DISABLED_WANDS = hitPlayer;
-                Bukkit.getScheduler().runTaskLater(WizardDuels.getPlugin(WizardDuels.class), () -> DISABLED_WANDS = null, 100);
+                opponentData.disabledWands = true;
+                Bukkit.getScheduler().runTaskLater(WizardDuels.getPlugin(WizardDuels.class), () -> opponentData.disabledWands = false, 100);
             });
 
             // ========= REDSTONE WAND =========
@@ -841,26 +834,28 @@ public class WandUsage {
                 // Make 3x3 wall of dispensers that constantly shoot
             }
             case POWER_BOOST -> {
-                BOOSTED_ABILITIES = player;
-                Bukkit.getScheduler().runTaskLater(WizardDuels.getPlugin(WizardDuels.class), () -> BOOSTED_ABILITIES = null, RANDOM.nextLong(100, 180));
+                playerData.boostedAbilities = true;
+                Bukkit.getScheduler().runTaskLater(WizardDuels.getPlugin(WizardDuels.class), () -> playerData.boostedAbilities = false, RANDOM.nextLong(100, 180));
             }
         }
     }
 
-    private static int b(Player p, int o, int b) {
-        return BOOSTED_ABILITIES == p ? b : o;
+    @Contract(pure = true)
+    private static int b(@NotNull PlayerData p, int o, int b) {
+        return p.boostedAbilities ? b : o;
     }
-    private static double b(Player p, double o, double b) {
-        return BOOSTED_ABILITIES == p ? b : o;
+    @Contract(pure = true)
+    private static double b(@NotNull PlayerData p, double o, double b) {
+        return p.boostedAbilities ? b : o;
     }
 
-    private static @NotNull Location getRandomLocation(@NotNull Location center, int radius) {
+    public static @NotNull Location getRandomLocation(@NotNull Location center, int radius) {
         double x = center.getX() + (Math.random() - 0.5) * radius * 2;
         double z = center.getZ() + (Math.random() - 0.5) * radius * 2;
         return new Location(center.getWorld(), x, center.getY(), z);
     }
 
-    private static int specialRandom10() {
+    public static int specialRandom10() {
         final int[] thresholds = { 1, 3, 6, 10, 15, 21, 28, 36, 45, 55 };
 
         int random = RANDOM.nextInt(1, 56);

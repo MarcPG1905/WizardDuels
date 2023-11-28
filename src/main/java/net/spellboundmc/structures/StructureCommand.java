@@ -1,6 +1,6 @@
 package net.spellboundmc.structures;
 
-import net.hectus.text.Completer;
+import me.marcpg1905.text.Completer;
 import net.kyori.adventure.text.Component;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -13,7 +13,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-import static net.hectus.color.McColor.*;
+import static me.marcpg1905.color.McFormat.*;
 
 public class StructureCommand implements CommandExecutor, TabCompleter {
     @Override

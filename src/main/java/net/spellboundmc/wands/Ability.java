@@ -45,7 +45,7 @@ public enum Ability {
     SPEEDY_OVERCHARGE(40, Wand.ELECTRIC),
     ELECTRIC_ZONE(30, Wand.ELECTRIC),
     ELECTRO_PHANTOMS(25, Wand.ELECTRIC),
-    SHRIEK(15, Wand.SCULK),
+    SONIC_BOOM(15, Wand.SCULK),
     SCULK_TELEPORT(10, Wand.SCULK),
     WARDEN(60, Wand.SCULK),
     SCULK_GROWTH(45, Wand.SCULK),
@@ -91,4 +91,3 @@ public enum Ability {
         this.wand = wand;
     }
 }
-

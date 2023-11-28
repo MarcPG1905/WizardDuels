@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import static net.hectus.color.McColor.*;
+import static me.marcpg1905.color.McFormat.*;
 
 public class InformationManager {
     private static final ScoreboardManager manager = Bukkit.getScoreboardManager();
@@ -29,13 +29,13 @@ public class InformationManager {
             updateBasic(match, true);
             updateBasic(match, false);
 
-            updateActionBar(match.team1, match.cooldowns1);
-            updateActionBar(match.team2, match.cooldowns2);
+            updateActionBar(match.player1, match.playerData1.abilityCooldowns);
+            updateActionBar(match.player2, match.playerData2.abilityCooldowns);
         }, 0, 5);
     }
 
     public static void updateBasic(@NotNull Basic1v1 match, boolean team1) {
-        Player player = (team1 ? match.team1 : match.team2);
+        Player player = (team1 ? match.player1 : match.player2);
         Locale l = player.locale();
 
         Scoreboard scoreboard = manager.getNewScoreboard();
@@ -44,8 +44,8 @@ public class InformationManager {
 
         List<Score> scores = new ArrayList<>();
 
-        scores.add(objective.getScore(GREEN + Translation.get(l, "scoreboard.hp.team") + (int) (team1 ? match.team1 : match.team2).getHealth()));
-        scores.add(objective.getScore(GREEN + Translation.get(l, "scoreboard.hp.enemy") + (int) (team1 ? match.team2 : match.team1).getHealth()));
+        scores.add(objective.getScore(GREEN + Translation.get(l, "scoreboard.hp.team") + (int) (team1 ? match.player1 : match.player2).getHealth()));
+        scores.add(objective.getScore(GREEN + Translation.get(l, "scoreboard.hp.enemy") + (int) (team1 ? match.player2 : match.player1).getHealth()));
         scores.add(objective.getScore(" "));
         scores.add(objective.getScore(GOLD + Translation.get(l, "scoreboard.match_rank") + "1.0"));
         scores.add(objective.getScore("  "));
@@ -59,7 +59,7 @@ public class InformationManager {
             scores.get(i).setScore(scoreValue - i);
         }
 
-        (team1 ? match.team1 : match.team2).setScoreboard(scoreboard);
+        (team1 ? match.player1 : match.player2).setScoreboard(scoreboard);
     }
 
     public static void stopBasic(@NotNull Player player1, @NotNull Player player2) {
@@ -77,6 +77,7 @@ public class InformationManager {
                 break;
             }
         }
+
         boolean sneak = player.isSneaking();
         player.sendActionBar(Component.text(cooldowns.get(wand.abilities[sneak ? 2 : 0]) + "s | " + cooldowns.get(wand.abilities[sneak ? 3 : 1]) + "s", sneak ? TextColor.color(150, 180, 255) : TextColor.color(255, 255, 255), TextDecoration.ITALIC));
     }

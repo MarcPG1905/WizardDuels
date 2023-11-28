@@ -2,10 +2,7 @@ package net.spellboundmc.match;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.title.Title;
-import net.spellboundmc.MatchTimer;
-import net.spellboundmc.InformationManager;
-import net.spellboundmc.Translation;
-import net.spellboundmc.WizardDuels;
+import net.spellboundmc.*;
 import net.spellboundmc.wands.Ability;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -13,10 +10,9 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.HashMap;
 import java.util.Locale;
 
-import static net.hectus.color.McColor.*;
+import static me.marcpg1905.color.McFormat.*;
 
 /**
  * Duos2v2 is where two players compete with each other.
@@ -24,23 +20,19 @@ import static net.hectus.color.McColor.*;
 public class Basic1v1 implements Match {
     public static final PotionEffect witherEffect = new PotionEffect(PotionEffectType.WITHER, -1, 0, true, false, false);
 
-    public final Player team1;
-    public final Player team2;
-    public final HashMap<Ability, Integer> cooldowns1 = new HashMap<>();
-    public final HashMap<Ability, Integer> cooldowns2 = new HashMap<>();
+    public final Player player1;
+    public final Player player2;
+    public final PlayerData playerData1;
+    public final PlayerData playerData2;
     public final MatchTimer timer;
 
     public Basic1v1(@NotNull Player player1, @NotNull Player player2) {
-        team1 = player1;
-        team2 = player2;
-
-        for (Ability ability : Ability.values()) {
-            cooldowns1.put(ability, 0);
-            cooldowns2.put(ability, 0);
-        }
+        this.player1 = player1;
+        this.player2 = player2;
+        playerData1 = new PlayerData(player1);
+        playerData2 = new PlayerData(player2);
 
         timer = new MatchTimer(this);
-
 
         startMain();
     }
@@ -54,20 +46,20 @@ public class Basic1v1 implements Match {
     @Override
     public void stop() {
         timer.stop();
-        InformationManager.stopBasic(team1, team2);
+        InformationManager.stopBasic(player1, player2);
     }
 
     @Override
     public void withering() {
-        team1.addPotionEffect(witherEffect);
-        team2.addPotionEffect(witherEffect);
+        player1.addPotionEffect(witherEffect);
+        player2.addPotionEffect(witherEffect);
 
-        team1.getWorld().getPlayers().forEach(p -> p.sendActionBar(Component.text(Translation.get(p.locale(), "match.withering"))));
+        player1.getWorld().getPlayers().forEach(p -> p.sendActionBar(Component.text(Translation.get(p.locale(), "match.withering"))));
     }
 
     public void lose(Player loser) {
         Bukkit.getScheduler().runTaskLater(WizardDuels.getPlugin(WizardDuels.class), () -> {
-            Player winner = loser == team1 ? team2 : team1;
+            Player winner = loser == player1 ? player2 : player1;
             Locale ll = loser.locale();
             Locale wl = winner.locale();
 
@@ -81,7 +73,7 @@ public class Basic1v1 implements Match {
 
     public void tie() {
         Bukkit.getScheduler().runTaskLater(WizardDuels.getPlugin(WizardDuels.class), () -> {
-            for (Player player : team1.getWorld().getPlayers()) {
+            for (Player player : player1.getWorld().getPlayers()) {
                 Locale l = player.locale();
                 player.showTitle(Title.title(Component.text(YELLOW + Translation.get(l, "match.tie")), Component.text(Translation.get(l, "match.tie.text"))));
                 player.sendMessage(Component.text(YELLOW + Translation.get(l, "match.tie.chat")));
