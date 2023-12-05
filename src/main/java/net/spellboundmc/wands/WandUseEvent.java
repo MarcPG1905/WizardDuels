@@ -33,10 +33,9 @@ import static net.spellboundmc.wands.WandUsage.*;
 public class WandUseEvent implements Listener {
     @EventHandler
     public void onPlayerInteract(@NotNull PlayerInteractEvent event) {
-        if (!event.hasItem()) return;
+        if (WizardDuels.currentMatch != null || !event.hasItem()) return;
 
         Player player = event.getPlayer();
-
         wandUse(Objects.requireNonNull(event.getItem()).getType(), UseType.fromAction(event.getAction(), player), player);
     }
 
@@ -218,6 +217,8 @@ public class WandUseEvent implements Listener {
 
     @EventHandler
     public void onVehicleExit(@NotNull VehicleExitEvent event) {
+        if (WizardDuels.currentMatch != null) return;
+
         if (event.getVehicle() instanceof Horse horse) {
             horse.eject();
             horse.remove();
@@ -226,6 +227,8 @@ public class WandUseEvent implements Listener {
 
     @EventHandler
     public void onEntityTargetLivingEntity(@NotNull EntityTargetLivingEntityEvent event) {
+        if (WizardDuels.currentMatch != null) return;
+
         if (event.getEntity() instanceof Skeleton skeleton) {
             if (!skeleton.getScoreboardTags().contains("venomous")) return;
 
@@ -238,6 +241,8 @@ public class WandUseEvent implements Listener {
 
     @EventHandler
     public void onEntityShootBow(@NotNull EntityShootBowEvent event) {
+        if (WizardDuels.currentMatch != null) return;
+
         if (event.getEntity().getScoreboardTags().contains("venomous")) {
             if (event.getProjectile() instanceof Arrow arrow) {
                 arrow.addCustomEffect(new PotionEffect(PotionEffectType.POISON, 5, 0), true);
@@ -247,6 +252,8 @@ public class WandUseEvent implements Listener {
 
     @EventHandler
     public void onPlayerMove(PlayerMoveEvent event) {
+        if (WizardDuels.currentMatch != null) return;
+
         if (ICY_FEET != null) {
             if (ICY_FEET == event.getPlayer()) {
                 Location loc = event.getPlayer().getLocation().subtract(0, 1, 0);
@@ -315,6 +322,8 @@ public class WandUseEvent implements Listener {
 
     @EventHandler
     public void onProjectileHit(@NotNull ProjectileHitEvent event) {
+        if (WizardDuels.currentMatch != null) return;
+
         if (event.getHitEntity() == null) return;
 
         Entity entity = event.getHitEntity();
@@ -334,6 +343,8 @@ public class WandUseEvent implements Listener {
 
     @EventHandler
     public void onEntityMove(@NotNull EntityMoveEvent event) {
+        if (WizardDuels.currentMatch != null) return;
+
         if (event.getEntity() instanceof Projectile projectile) {
             if (STORM_WALL == null) return;
 
@@ -349,6 +360,8 @@ public class WandUseEvent implements Listener {
 
     @EventHandler
     public void onEntityDamageByEntity(@NotNull EntityDamageByEntityEvent event) {
+        if (WizardDuels.currentMatch != null) return;
+
         if (event.getDamager() instanceof LightningStrike) {
             event.setDamage(4);
         }
@@ -362,6 +375,8 @@ public class WandUseEvent implements Listener {
 
     @EventHandler
     public void onEntityDamage(@NotNull EntityDamageEvent event) {
+        if (WizardDuels.currentMatch != null) return;
+
         if (event.getEntity() instanceof Player player) {
             if (STORM_WALL == player) {
                 event.setDamage(event.getDamage() / 2);
@@ -371,6 +386,8 @@ public class WandUseEvent implements Listener {
 
     @EventHandler
     public void onEntityDeath(@NotNull EntityDeathEvent event) {
+        if (WizardDuels.currentMatch != null) return;
+
         Basic1v1 basic1v1 = (Basic1v1) WizardDuels.currentMatch;
         if (event.getEntity() instanceof EnderCrystal) {
             event.getDrops().clear();

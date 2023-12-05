@@ -8,10 +8,7 @@ import net.spellboundmc.match.Basic1v1;
 import net.spellboundmc.wands.WandUsage;
 import org.bukkit.*;
 import org.bukkit.enchantments.Enchantment;
-import org.bukkit.entity.EnderCrystal;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.Fireball;
-import org.bukkit.entity.Player;
+import org.bukkit.entity.*;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
@@ -20,7 +17,7 @@ import java.util.HashMap;
 import java.util.Locale;
 
 public class SpellUsage {
-    public static void spellUse(Material spell, @NotNull Player player) {
+    public static boolean spellUse(Material spell, @NotNull Player player) {
         Locale l = player.locale();
         Location loc = player.getLocation();
         World world = player.getWorld();
@@ -34,7 +31,7 @@ public class SpellUsage {
         if (map.get(spell) >= 0) {
             player.playSound(loc, Sound.ENTITY_VILLAGER_NO, 0.25f, 1.0f);
             player.sendMessage("You're using your spells too fast, cool down!");
-            return;
+            return true;
         }
 
         switch (spell) {
@@ -47,7 +44,7 @@ public class SpellUsage {
             case END_CRYSTAL -> {
                 boolean worldHasCrystal = false;
                 for (Entity entity : world.getEntities()) {
-                    if (entity instanceof EnderCrystal) {
+                    if (entity.getType() == EntityType.ENDER_CRYSTAL || entity instanceof EnderCrystal) {
                         worldHasCrystal = true;
                         break;
                     }
@@ -55,6 +52,7 @@ public class SpellUsage {
 
                 if (worldHasCrystal) {
                     player.sendMessage(Component.text(McFormat.RED + "There is already a crystal. Destroy it first, before summoning your own!"));
+                    return true;
                 } else {
                     playerData.spellCooldowns.put(spell, Integer.MAX_VALUE);
                     playerData.spellCrystalActive = true;
@@ -92,6 +90,9 @@ public class SpellUsage {
                         player.getInventory().remove(Material.DIAMOND_SWORD);
                         player.getInventory().addItem(new ItemStack(Material.IRON_SWORD));
                     }, 300);
+                } else {
+                    player.sendMessage(Component.text("You can only use the smithing table when you have a sword!"));
+                    return true;
                 }
             }
             case FLETCHING_TABLE -> {
@@ -108,8 +109,12 @@ public class SpellUsage {
                         player.getInventory().remove(Material.BOW);
                         player.getInventory().addItem(new ItemStack(Material.IRON_SWORD));
                     }, 400);
+                } else {
+                    player.sendMessage(Component.text("You can only use the fletching table when you have a sword!"));
+                    return true;
                 }
             }
         }
+        return false;
     }
 }

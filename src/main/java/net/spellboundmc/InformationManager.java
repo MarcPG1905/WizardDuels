@@ -79,6 +79,6 @@ public class InformationManager {
         }
 
         boolean sneak = player.isSneaking();
-        player.sendActionBar(Component.text(cooldowns.get(wand.abilities[sneak ? 2 : 0]) + "s | " + cooldowns.get(wand.abilities[sneak ? 3 : 1]) + "s", sneak ? TextColor.color(150, 180, 255) : TextColor.color(255, 255, 255), TextDecoration.ITALIC));
+        // player.sendActionBar(Component.text(cooldowns.get(wand.abilities[(sneak ? 2 : 0)]) + "s | " + cooldowns.get(wand.abilities[(sneak ? 3 : 1)]) + "s", sneak ? TextColor.color(150, 180, 255) : TextColor.color(255, 255, 255), TextDecoration.ITALIC));
     }
 }

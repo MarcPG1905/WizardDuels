@@ -17,20 +17,32 @@ import org.jetbrains.annotations.NotNull;
 public class SpellUseEvent implements Listener {
     @EventHandler
     public void onBlockPlace(@NotNull BlockPlaceEvent event) {
-        SpellUsage.spellUse(event.getBlockPlaced().getType(), event.getPlayer());
+        if (WizardDuels.currentMatch != null) return;
+
+        if (SpellUsage.spellUse(event.getBlockPlaced().getType(), event.getPlayer())) {
+            event.setCancelled(true);
+        }
     }
 
     @EventHandler
     public void onBlockBreak(@NotNull BlockBreakEvent event) {
+        if (WizardDuels.currentMatch != null) return;
+
         if (event.getBlock().getType() == Material.DARK_PRISMARINE) {
             World world = event.getPlayer().getWorld();
             world.setThundering(false);
             world.setStorm(false);
+
+            Basic1v1 basic1v1 = (Basic1v1) WizardDuels.currentMatch;
+            (event.getPlayer() == basic1v1.player1 ? basic1v1.playerData1 : basic1v1.playerData2).thunderEffect = false;
+            (event.getPlayer() == basic1v1.player1 ? basic1v1.playerData2 : basic1v1.playerData1).thunderEffect = false;
         }
     }
 
     @EventHandler
     public void onProjectileHit(@NotNull PlayerLaunchProjectileEvent event) {
+        if (WizardDuels.currentMatch != null) return;
+
         Basic1v1 basic1v1 = (Basic1v1) WizardDuels.currentMatch;
         if (event.getProjectile() instanceof Fireball) {
             PlayerData data = event.getPlayer() == basic1v1.player1 ? basic1v1.playerData1 : basic1v1.playerData2;

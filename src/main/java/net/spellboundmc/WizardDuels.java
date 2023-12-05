@@ -3,6 +3,7 @@ package net.spellboundmc;
 import net.spellboundmc.match.GiveUpCommand;
 import net.spellboundmc.match.Match;
 import net.spellboundmc.match.MatchCommand;
+import net.spellboundmc.spells.SpellUseEvent;
 import net.spellboundmc.structures.StructureCommand;
 import net.spellboundmc.structures.StructureManager;
 import net.spellboundmc.wands.WandUseEvent;
@@ -29,6 +30,7 @@ public final class WizardDuels extends JavaPlugin {
         Objects.requireNonNull(getCommand("structure")).setExecutor(new StructureCommand());
 
         getServer().getPluginManager().registerEvents(new WandUseEvent(), this);
+        getServer().getPluginManager().registerEvents(new SpellUseEvent(), this);
 
         WORLD = Bukkit.getWorld("world");
         DATA_FOLDER = getDataFolder();

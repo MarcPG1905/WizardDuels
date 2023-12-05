@@ -1,12 +1,23 @@
 package net.spellboundmc;
 
 import com.opencsv.CSVReader;
+import net.kyori.adventure.key.Key;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TranslatableComponent;
+import net.kyori.adventure.translation.GlobalTranslator;
+import net.kyori.adventure.translation.Translatable;
+import net.kyori.adventure.translation.TranslationRegistry;
+import net.kyori.adventure.util.UTF8ResourceBundleControl;
+import org.bukkit.Server;
+import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
+import java.awt.print.Paper;
 import java.io.File;
 import java.io.FileReader;
 import java.util.HashMap;
 import java.util.Locale;
+import java.util.ResourceBundle;
 
 import static net.spellboundmc.WizardDuels.DATA_FOLDER;
 
