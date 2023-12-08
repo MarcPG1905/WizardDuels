@@ -1,4 +1,4 @@
-package net.spellboundmc;
+package net.spellboundmc.other;
 
 import com.opencsv.CSVReader;
 import net.kyori.adventure.key.Key;
@@ -8,6 +8,7 @@ import net.kyori.adventure.translation.GlobalTranslator;
 import net.kyori.adventure.translation.Translatable;
 import net.kyori.adventure.translation.TranslationRegistry;
 import net.kyori.adventure.util.UTF8ResourceBundleControl;
+import net.spellboundmc.WizardDuels;
 import org.bukkit.Server;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;

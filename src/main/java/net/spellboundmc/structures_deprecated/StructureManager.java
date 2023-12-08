@@ -1,4 +1,4 @@
-package net.spellboundmc.structures;
+package net.spellboundmc.structures_deprecated;
 
 import com.google.gson.Gson;
 import net.spellboundmc.WizardDuels;
@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashSet;
 
+@Deprecated
 public class StructureManager {
     public static HashSet<Structure> LOADED_STRUCTURES = new HashSet<>();
     private static final Gson GSON = new Gson();

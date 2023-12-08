@@ -15,11 +15,15 @@ public class PlayerData {
             Material.NETHERRACK, 0,
             Material.DARK_PRISMARINE, 0,
             Material.SMITHING_TABLE, 0,
-            Material.FLETCHING_TABLE, 0
+            Material.FLETCHING_TABLE, 0,
+            Material.WATER_BUCKET, 0,
+            Material.LAVA_BUCKET, 0
     ));
     public final HashMap<Ability, Integer> abilityCooldowns = new HashMap<>();
-    public boolean wandCrystalActive, spellCrystalActive, disabledWands, boostedAbilities, thunderEffect;
-    public int fireballsLeft;
+    public boolean wandCrystalActive, spellCrystalActive, disabledWands, boostedAbilities, thunderEffect, spellLuck25;
+    public int fireballsLeft, lavaBucketLevel = 1, waterBucketLevel = 1;
+    public int tokens;
+    public boolean shopDone;
 
 
     public PlayerData(Player player) {

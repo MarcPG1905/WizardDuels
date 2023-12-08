@@ -1,4 +1,4 @@
-package net.spellboundmc.structures;
+package net.spellboundmc.structures_deprecated;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -14,6 +14,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.HashSet;
 
+@Deprecated
 public class Structure {
     public final String name;
     public final HashSet<BlockData> blockData;

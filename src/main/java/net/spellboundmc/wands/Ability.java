@@ -1,6 +1,14 @@
 package net.spellboundmc.wands;
 
-public enum Ability {
+import me.marcpg1905.util.Formatter;
+import net.spellboundmc.Turn;
+import net.spellboundmc.other.Translation;
+import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.Locale;
+
+public enum Ability implements Turn {
     EXPLOSION_CHARGE(5, Wand.EXPLOSION),
     PRESSURE_WAVE(15, Wand.EXPLOSION),
     CREEPER_THROW(15, Wand.EXPLOSION),
@@ -73,15 +81,10 @@ public enum Ability {
     REDSTONE_DASH(6, Wand.REDSTONE),
     DISPENSER_WALL(20, Wand.REDSTONE),
     POWER_BOOST(30, Wand.REDSTONE),
-
-    //======================//
-    //   TODO: Code these   //
-    //======================//
     LITTLE_ACCIDENT(20, Wand.POTION_MASTER),
     COCKTAIL(20, Wand.POTION_MASTER),
     MAGIC_CULT(30, Wand.POTION_MASTER),
     ORANGE_JUICE(15, Wand.POTION_MASTER);
-    //======================//
 
     public final int cooldown;
     public final Wand wand;
@@ -89,5 +92,20 @@ public enum Ability {
     Ability(int cooldown, Wand wand) {
         this.cooldown = cooldown;
         this.wand = wand;
+    }
+
+    @Override
+    public @NotNull String text(Player player, boolean translated) {
+        if (translated) {
+            Locale l = player.locale();
+            return Translation.get(l, "wand.usage", player.getName(), Translation.get(l, translationKey()), Translation.get(l, "wand." + wand.name().toLowerCase()));
+        } else {
+            return player.getName() + " used the " + Formatter.toPascalCase(name()) + " ability from the " + Formatter.toPascalCase(wand.name()) + " wand.";
+        }
+    }
+
+    @Override
+    public @NotNull String translationKey() {
+        return "wand." + wand.name().toLowerCase() + "." + name().toLowerCase();
     }
 }

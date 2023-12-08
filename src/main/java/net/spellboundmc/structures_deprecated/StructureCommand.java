@@ -1,4 +1,4 @@
-package net.spellboundmc.structures;
+package net.spellboundmc.structures_deprecated;
 
 import me.marcpg1905.text.Completer;
 import net.kyori.adventure.text.Component;
@@ -15,6 +15,7 @@ import java.util.List;
 
 import static me.marcpg1905.color.McFormat.*;
 
+@Deprecated
 public class StructureCommand implements CommandExecutor, TabCompleter {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String @NotNull [] args) {

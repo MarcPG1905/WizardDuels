@@ -28,7 +28,10 @@ public class SpellUsage {
         PlayerData opponentData = basic1v1.player1 == player ? basic1v1.playerData2 : basic1v1.playerData1;
 
         HashMap<Material, Integer> map = playerData.spellCooldowns;
-        if (map.get(spell) >= 0) {
+        if (map.get(spell) == null) {
+            player.sendMessage("Missing spell entry!");
+            WizardDuels.LOG.warning("Missing spell entry: " + spell.name() + " for " + player.getName());
+        } else if (map.get(spell) >= 0) {
             player.playSound(loc, Sound.ENTITY_VILLAGER_NO, 0.25f, 1.0f);
             player.sendMessage("You're using your spells too fast, cool down!");
             return true;
@@ -113,6 +116,27 @@ public class SpellUsage {
                     player.sendMessage(Component.text("You can only use the fletching table when you have a sword!"));
                     return true;
                 }
+            }
+            case OBSIDIAN -> playerData.spellLuck25 = true;
+            case LAVA -> {
+                for (double i = 0; i < 2 * Math.PI; i += 0.1) {
+                    double x = (playerData.lavaBucketLevel + 1) * Math.cos(i);
+                    double z = (playerData.lavaBucketLevel + 1) * Math.sin(i);
+
+                    loc.toCenterLocation().add(x, 0, z).getBlock().setType(Material.LAVA);
+                }
+                if (playerData.lavaBucketLevel < 4) playerData.lavaBucketLevel++;
+            }
+            case WATER -> {
+                for (double i = 0; i < 2 * Math.PI; i += 0.1) {
+                    double x = (playerData.waterBucketLevel + 1) * Math.cos(i);
+                    double z = (playerData.waterBucketLevel + 1) * Math.sin(i);
+                    Location blockLoc = loc.toCenterLocation().add(x, 0, z);
+                    for (int j = 0; j < 7; j++) {
+                        blockLoc.add(0, 1, 0).getBlock().setType(Material.WATER);
+                    }
+                }
+                if (playerData.waterBucketLevel < 3) playerData.waterBucketLevel++;
             }
         }
         return false;

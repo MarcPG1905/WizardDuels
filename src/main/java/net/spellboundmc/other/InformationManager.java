@@ -1,10 +1,10 @@
-package net.spellboundmc;
+package net.spellboundmc.other;
 
-import net.kyori.adventure.text.format.TextColor;
-import net.kyori.adventure.text.format.TextDecoration;
-import net.spellboundmc.match.Basic1v1;
 import net.kyori.adventure.text.Component;
-import net.spellboundmc.wands.Ability;
+import net.kyori.adventure.text.format.TextColor;
+import net.spellboundmc.PlayerData;
+import net.spellboundmc.WizardDuels;
+import net.spellboundmc.match.Basic1v1;
 import net.spellboundmc.wands.Wand;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -16,7 +16,6 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 
 import static me.marcpg1905.color.McFormat.*;
 
@@ -29,8 +28,8 @@ public class InformationManager {
             updateBasic(match, true);
             updateBasic(match, false);
 
-            updateActionBar(match.player1, match.playerData1.abilityCooldowns);
-            updateActionBar(match.player2, match.playerData2.abilityCooldowns);
+            updateActionBar(match.playerData1);
+            updateActionBar(match.playerData1);
         }, 0, 5);
     }
 
@@ -52,7 +51,7 @@ public class InformationManager {
         scores.add(objective.getScore(BLUE + Translation.get(l, "scoreboard.time") + match.timer.getLeft().getOneUnitFormatted()));
         scores.add(objective.getScore("   "));
         scores.add(objective.getScore(GRAY + Translation.get(l, "scoreboard.map") + "PLACEHOLDER"));
-        scores.add(objective.getScore(GRAY + Translation.get(l, "scoreboard.map_size") + "PLACEHOLDER"));
+        scores.add(objective.getScore(GRAY + Translation.get(l, "scoreboard.map_size") + match.mapSize));
 
         int scoreValue = scores.size() - 1;
         for (int i = scoreValue; i >= 0; i--) {
@@ -68,17 +67,34 @@ public class InformationManager {
         basicScoreboard.cancel();
     }
 
-    public static void updateActionBar(@NotNull Player player, Map<Ability, Integer> cooldowns) {
-        Material mainHandItem = player.getInventory().getItemInMainHand().getType();
-        Wand wand = Wand.EXPLOSION;
-        for (Wand tempWand : Wand.values()) {
+    public static void updateActionBar(@NotNull PlayerData playerData) {
+        Material mainHandItem = playerData.player.getInventory().getItemInMainHand().getType();
+        Wand wand = Wand.NONE;
+        for (Wand tempWand : List.of(Wand.values())) {
             if (tempWand.item == mainHandItem) {
                 wand = tempWand;
                 break;
             }
         }
 
-        boolean sneak = player.isSneaking();
-        // player.sendActionBar(Component.text(cooldowns.get(wand.abilities[(sneak ? 2 : 0)]) + "s | " + cooldowns.get(wand.abilities[(sneak ? 3 : 1)]) + "s", sneak ? TextColor.color(150, 180, 255) : TextColor.color(255, 255, 255), TextDecoration.ITALIC));
+        if (wand != Wand.NONE) {
+            boolean sneak = playerData.player.isSneaking();
+            int lmbCooldown = Math.max(0, playerData.abilityCooldowns.get(wand.abilities[sneak ? 2 : 0]));
+            System.out.println(lmbCooldown);
+            int rmbCooldown = Math.max(0, playerData.abilityCooldowns.get(wand.abilities[sneak ? 3 : 1]));
+            System.out.println(rmbCooldown);
+            playerData.player.sendActionBar(Component.text(lmbCooldown + "s | " + rmbCooldown + "s", sneak ? TextColor.color(150, 180, 255) : TextColor.color(255, 255, 255)));
+        } else {
+            if (!playerData.spellCooldowns.containsKey(mainHandItem)) return;
+
+            Integer cooldown = playerData.spellCooldowns.get(mainHandItem);
+            System.out.println(cooldown);
+
+            if (cooldown <= 0){
+                playerData.player.sendActionBar(Component.text(cooldown + "s", TextColor.color(255, 200, 200)));
+            } else {
+                playerData.player.sendActionBar(Component.text("Ready!", TextColor.color(200, 255, 200)));
+            }
+        }
     }
 }

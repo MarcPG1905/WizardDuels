@@ -1,7 +1,7 @@
 package net.spellboundmc.match;
 
 import me.marcpg1905.color.McFormat;
-import net.spellboundmc.Translation;
+import net.spellboundmc.other.Translation;
 import net.spellboundmc.WizardDuels;
 import net.kyori.adventure.text.Component;
 import org.bukkit.command.Command;

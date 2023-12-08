@@ -1,7 +1,8 @@
-package net.spellboundmc;
+package net.spellboundmc.match;
 
 import me.marcpg1905.data.time.Time;
 import me.marcpg1905.data.time.Timer;
+import net.spellboundmc.WizardDuels;
 import net.spellboundmc.match.Basic1v1;
 import net.spellboundmc.match.Match;
 import net.spellboundmc.wands.Ability;

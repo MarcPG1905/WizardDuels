@@ -3,13 +3,20 @@ package net.spellboundmc.match;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.title.Title;
 import net.spellboundmc.*;
-import net.spellboundmc.wands.Ability;
+import net.spellboundmc.other.InformationManager;
+import net.spellboundmc.other.Translation;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 import static me.marcpg1905.color.McFormat.*;
@@ -18,13 +25,18 @@ import static me.marcpg1905.color.McFormat.*;
  * Duos2v2 is where two players compete with each other.
  */
 public class Basic1v1 implements Match {
-    public static final PotionEffect witherEffect = new PotionEffect(PotionEffectType.WITHER, -1, 0, true, false, false);
+    public static final ItemStack EMPTY_ITEM = new ItemStack(Material.LIGHT_GRAY_STAINED_GLASS_PANE);
 
+
+    public final List<Turn> history = new ArrayList<>();
     public final Player player1;
     public final Player player2;
     public final PlayerData playerData1;
     public final PlayerData playerData2;
     public final MatchTimer timer;
+    public String mapSize = "ERROR";
+    public Player ICE_STORM, FIRE_RING, STORM_WALL, ICY_FEET, OPPONENTS_NO_MOVEMENT, TORNADO, POISON_SKELETONS, NO_GRAVITATION;
+    public PrePhase prePhase = PrePhase.NONE;
 
     public Basic1v1(@NotNull Player player1, @NotNull Player player2) {
         this.player1 = player1;
@@ -34,7 +46,49 @@ public class Basic1v1 implements Match {
 
         timer = new MatchTimer(this);
 
-        startMain();
+        startPrePhase();
+    }
+
+    public void startPrePhase() {
+        nextPrePhase();
+    }
+
+    public void nextPrePhase() {
+        prePhase = PrePhase.values()[prePhase.ordinal() + 1];
+
+        if (prePhase == PrePhase.SHOP) {
+            prePhase = PrePhase.NONE;
+            return;
+        }
+
+        switch (prePhase) {
+            case TIME_OF_DAY -> createInv(player2, 9, new int[]{ 0, 4, 8 }, "Choose the time of the day!",
+                    item(Material.PINK_WOOL, Component.text("Morning")),
+                    item(Material.LIGHT_BLUE_WOOL, Component.text("Noon")),
+                    item(Material.CYAN_WOOL, Component.text("Afternoon")),
+                    item(Material.ORANGE_WOOL, Component.text("Evening")),
+                    item(Material.BLUE_WOOL, Component.text("Night")),
+                    item(Material.BLACK_WOOL, Component.text("Midnight"))
+            );
+            case MAP_SIZE -> createInv(player1, 9, new int[]{ 0, 1, 7, 8 }, "Choose the map size!",
+                    item(Material.CYAN_WOOL, Component.text("Mini (8x8)")),
+                    item(Material.LIME_WOOL, Component.text("Small (16x16)")),
+                    item(Material.YELLOW_WOOL, Component.text("Normal (32x32)")),
+                    item(Material.ORANGE_WOOL, Component.text("Big (64x64)")),
+                    item(Material.RED_WOOL, Component.text("Huge (128x128)"))
+            );
+            case TOKEN_AMOUNT -> createInv(player2, 9, new int[]{ 0, 1, 4, 7, 8 }, "Choose the token amount!",
+                    item(Material.CYAN_WOOL, Component.text("Poor (10 Tokens)")),
+                    item(Material.LIME_WOOL, Component.text("Low (20 Tokens)")),
+                    item(Material.YELLOW_WOOL, Component.text("High (40 Tokens)")),
+                    item(Material.ORANGE_WOOL, Component.text("Rich (80 Tokens)"))
+            );
+            case WEATHER -> createInv(player1, 9, new int[]{ 0, 1, 3, 5, 7, 8 }, "Choose the weather!",
+                    item(Material.BLUE_WOOL, Component.text("Rain")),
+                    item(Material.LIGHT_BLUE_WOOL, Component.text("Clear")),
+                    item(Material.GRAY_WOOL, Component.text("Thunder"))
+            );
+        }
     }
 
     @Override
@@ -51,8 +105,8 @@ public class Basic1v1 implements Match {
 
     @Override
     public void withering() {
-        player1.addPotionEffect(witherEffect);
-        player2.addPotionEffect(witherEffect);
+        player1.addPotionEffect(new PotionEffect(PotionEffectType.WITHER, -1, 0, true, false, false));
+        player2.addPotionEffect(new PotionEffect(PotionEffectType.WITHER, -1, 0, true, false, false));
 
         player1.getWorld().getPlayers().forEach(p -> p.sendActionBar(Component.text(Translation.get(p.locale(), "match.withering"))));
     }
@@ -79,5 +133,21 @@ public class Basic1v1 implements Match {
                 player.sendMessage(Component.text(YELLOW + Translation.get(l, "match.tie.chat")));
             }
         }, 20);
+    }
+
+    public static void createInv(Player player, int rows, int @NotNull [] emptySpots, String title, ItemStack... items) {
+        Inventory inv = Bukkit.createInventory(player, rows * 9, Component.text(title));
+        for (int emptySpot : emptySpots) {
+            inv.setItem(emptySpot, EMPTY_ITEM);
+        }
+        inv.addItem(items);
+        player.closeInventory(InventoryCloseEvent.Reason.PLUGIN);
+        player.openInventory(inv);
+    }
+
+    public static @NotNull ItemStack item(Material material, Component name) {
+        ItemStack item = new ItemStack(material);
+        item.editMeta(meta -> meta.displayName(name));
+        return item;
     }
 }

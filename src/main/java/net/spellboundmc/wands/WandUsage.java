@@ -7,7 +7,7 @@ import net.kyori.adventure.sound.SoundStop;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.title.Title;
 import net.spellboundmc.PlayerData;
-import net.spellboundmc.Translation;
+import net.spellboundmc.other.Translation;
 import net.spellboundmc.WizardDuels;
 import net.spellboundmc.match.Basic1v1;
 import org.bukkit.*;
@@ -17,6 +17,7 @@ import org.bukkit.block.CreatureSpawner;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.*;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -35,11 +36,34 @@ import static org.bukkit.block.BlockFace.*;
 import static org.bukkit.entity.EntityType.*;
 
 public class WandUsage {
-    public static final List<Class<? extends Entity>> NECROMANCER_WAND_CREATURES = List.of(Zombie.class, Skeleton.class, Spider.class, Silverfish.class, Witch.class, Pillager.class, Guardian.class);
+    public static final List<Class<? extends LivingEntity>> NECROMANCER_WAND_CREATURES = List.of(Zombie.class, Skeleton.class, Spider.class, Silverfish.class, Witch.class, Pillager.class, Guardian.class);
     public static final List<EntityType> NECROMANCER_WAND_CREATURE_TYPES = List.of(ZOMBIE, SKELETON, SPIDER, SILVERFISH, WITCH, PILLAGER, GUARDIAN);
     public static final Map<Material, Integer> SWORDS = Map.of(Material.IRON_SWORD, 30, Material.GOLDEN_SWORD, 30, Material.DIAMOND_SWORD, 25, Material.NETHERITE_SWORD, 10, Material.BOOK, 5);
     public static final Random RANDOM = new Random();
-    public static Player ICE_STORM, FIRE_RING, STORM_WALL, ICY_FEET, OPPONENTS_NO_MOVEMENT, TORNADO, POISON_SKELETONS, NO_GRAVITATION;
+    public static final Set<PotionEffectType> BAD_EFFECTS = Set.of(
+            PotionEffectType.SLOW,
+            PotionEffectType.SLOW_DIGGING,
+            PotionEffectType.HARM,
+            PotionEffectType.CONFUSION,
+            PotionEffectType.BLINDNESS,
+            PotionEffectType.WEAKNESS,
+            PotionEffectType.POISON,
+            PotionEffectType.LEVITATION,
+            PotionEffectType.DARKNESS
+    );
+    public static final Set<PotionEffectType> GOOD_EFFECTS = Set.of(
+            PotionEffectType.SPEED,
+            PotionEffectType.FAST_DIGGING,
+            PotionEffectType.INCREASE_DAMAGE,
+            PotionEffectType.HEAL,
+            PotionEffectType.JUMP,
+            PotionEffectType.REGENERATION,
+            PotionEffectType.DAMAGE_RESISTANCE,
+            PotionEffectType.FIRE_RESISTANCE,
+            PotionEffectType.INVISIBILITY,
+            PotionEffectType.NIGHT_VISION,
+            PotionEffectType.ABSORPTION
+    );
 
     public static void wandUse(Ability ability, @NotNull Player player) {
         Locale l = player.locale();
@@ -81,6 +105,7 @@ public class WandUsage {
             case CREEPER_THROW -> {
                 player.playSound(loc, Sound.ENTITY_CREEPER_HURT, 1.0f, 1.0f);
                 Creeper creeper = player.getWorld().spawn(loc, Creeper.class);
+                creeper.setTarget(opponentData.player);
                 creeper.setVelocity(player.getEyeLocation().getDirection().normalize().multiply(b(playerData, 2.5, 4)));
             }
             case SUPER_BLAST -> {
@@ -130,18 +155,18 @@ public class WandUsage {
                 opponentData.player.stopSound(SoundStop.named(Sound.ENTITY_EVOKER_FANGS_ATTACK));
             }
             case ICE_ROAD -> {
-                ICY_FEET = player;
+                basic1v1.ICY_FEET = player;
                 player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, b(playerData, 200, 400), 1));
 
-                Bukkit.getScheduler().runTaskLater(WizardDuels.getPlugin(WizardDuels.class), () -> ICY_FEET = null, 200L);
+                Bukkit.getScheduler().runTaskLater(WizardDuels.getPlugin(WizardDuels.class), () -> basic1v1.ICY_FEET = null, 200L);
             }
             case FREEZE -> {
-                OPPONENTS_NO_MOVEMENT = player;
-                Bukkit.getScheduler().runTaskLater(WizardDuels.getPlugin(WizardDuels.class), () -> OPPONENTS_NO_MOVEMENT = null, b(playerData, 100, 200));
+                basic1v1.OPPONENTS_NO_MOVEMENT = player;
+                Bukkit.getScheduler().runTaskLater(WizardDuels.getPlugin(WizardDuels.class), () -> basic1v1.OPPONENTS_NO_MOVEMENT = null, b(playerData, 100, 200));
             }
             case ICE_STORM -> {
-                ICE_STORM = player;
-                Bukkit.getScheduler().runTaskLater(WizardDuels.getPlugin(WizardDuels.class), () -> ICE_STORM = null, 200L);
+                basic1v1.ICE_STORM = player;
+                Bukkit.getScheduler().runTaskLater(WizardDuels.getPlugin(WizardDuels.class), () -> basic1v1.ICE_STORM = null, 200L);
 
                 new BukkitRunnable() {
                     double angle = 0;
@@ -152,7 +177,7 @@ public class WandUsage {
                         player.playSound(player.getLocation(), Sound.ENTITY_HORSE_BREATHE, 0.5f, 1.0f);
 
                         if (duration >= 10) {
-                            ICE_STORM = null;
+                            basic1v1.ICE_STORM = null;
                             cancel();
                         }
 
@@ -239,18 +264,18 @@ public class WandUsage {
                 }, b(playerData, 120, 240));
             }
             case DRAGON -> {
-                EnderDragon dragon = world.spawn(player.getLocation(), EnderDragon.class);
-                dragon.setTarget(opponentData.player);
-
-                new BukkitRunnable() {
-                    @Override
-                    public void run() {
-                        if (dragon.getLocation().distance(opponentData.player.getLocation()) < 2.0) {
-                            dragon.remove();
-                            cancel();
-                        }
-                    }
-                }.runTaskTimer(WizardDuels.getPlugin(WizardDuels.class), 0, 2);
+                // EnderDragon dragon = world.spawn(player.getLocation(), EnderDragon.class);
+                // dragon.setTarget(opponentData.player);
+//
+                // new BukkitRunnable() {
+                //     @Override
+                //     public void run() {
+                //         if (dragon.getLocation().distance(opponentData.player.getLocation()) < 2.0) {
+                //             dragon.remove();
+                //             cancel();
+                //         }
+                //     }
+                // }.runTaskTimer(WizardDuels.getPlugin(WizardDuels.class), 0, 2);
             }
             case CRYSTAL_SHIELD -> {
                 Location randomLocation = getRandomLocation(loc, b(playerData, 10, 15));
@@ -263,7 +288,8 @@ public class WandUsage {
             case REVIVING_THE_DEAD -> {
                 player.playSound(loc, Sound.ENTITY_VEX_CHARGE, 1.0f, 1.0f);
 
-                Entity entity = player.getWorld().spawn(loc, NECROMANCER_WAND_CREATURES.get(RANDOM.nextInt(NECROMANCER_WAND_CREATURES.size())));
+                LivingEntity entity = player.getWorld().spawn(loc, NECROMANCER_WAND_CREATURES.get(RANDOM.nextInt(NECROMANCER_WAND_CREATURES.size())));
+                if (entity instanceof Monster monster) monster.setTarget(opponentData.player);
                 entity.setVelocity(player.getEyeLocation().getDirection().normalize().multiply(b(playerData, 2.5, 4)));
             }
             case HORSEMAN -> {
@@ -290,6 +316,7 @@ public class WandUsage {
                     entity.getEquipment().setBoots(new ItemStack(Material.NETHERITE_BOOTS));
                     entity.getEquipment().setItemInMainHand(new ItemStack(bool ? Material.IRON_SWORD : Material.BOW));
 
+                    entity.setTarget(opponentData.player);
                     entity.setVelocity(player.getEyeLocation().getDirection().normalize().multiply(b(playerData, 2.5, 4)));
                 }
             }
@@ -312,6 +339,7 @@ public class WandUsage {
             case GHAST_RIDER -> {
                 Ghast ghast = world.spawn(loc, Ghast.class);
                 ghast.addPassenger(player);
+                ghast.setTarget(opponentData.player);
 
                 Bukkit.getScheduler().runTaskLater(WizardDuels.getPlugin(WizardDuels.class), ghast::remove, 200);
                 player.setNoDamageTicks(40);
@@ -331,8 +359,8 @@ public class WandUsage {
             }
             case FIRE_RING -> {
                 player.playSound(loc, Sound.ITEM_FLINTANDSTEEL_USE, 1.5f, 1.0f);
-                FIRE_RING = player;
-                Bukkit.getScheduler().runTaskLater(WizardDuels.getPlugin(WizardDuels.class), () -> FIRE_RING = null, b(playerData, 200, 300));
+                basic1v1.FIRE_RING = player;
+                Bukkit.getScheduler().runTaskLater(WizardDuels.getPlugin(WizardDuels.class), () -> basic1v1.FIRE_RING = null, b(playerData, 200, 300));
             }
 
             // ============ WEATHER ============
@@ -381,7 +409,7 @@ public class WandUsage {
                         }
 
                         for (Player player : world.getPlayers()) {
-                            if (player != TORNADO && player.getLocation().distance(horseLoc) < 10) {
+                            if (player != basic1v1.TORNADO && player.getLocation().distance(horseLoc) < 10) {
                                 Vector direction = horseLoc.toVector().subtract(player.getLocation().toVector()).normalize();
                                 player.setVelocity(direction.multiply(0.06));
                             }
@@ -425,12 +453,12 @@ public class WandUsage {
                 });
             }
             case LOW_GRAVITY -> {
-                NO_GRAVITATION = player;
+                basic1v1.NO_GRAVITATION = player;
                 player.setGravity(false);
 
                 Bukkit.getScheduler().runTaskLater(WizardDuels.getPlugin(WizardDuels.class), () -> {
                     player.setGravity(true);
-                    NO_GRAVITATION = null;
+                    basic1v1.NO_GRAVITATION = null;
                     player.setNoDamageTicks(40);
                 }, b(playerData, 200, 300));
             }
@@ -523,6 +551,7 @@ public class WandUsage {
 
                 for (int i = 0; i < b(playerData, 6, 10); i++) {
                     Monster entity = world.spawn(loc, (Class<? extends Monster>) (i > b(playerData, 3, 5) ? Skeleton.class : Zombie.class));
+                    entity.setTarget(opponentData.player);
                     entity.setVelocity(player.getEyeLocation().getDirection().normalize().multiply(b(playerData, 2.5, 3)));
                 }
             }
@@ -669,12 +698,12 @@ public class WandUsage {
                     skeleton.addScoreboardTag("venomous");
                     skeleton.setTarget(opponentData.player);
                 }
-                POISON_SKELETONS = player;
+                basic1v1.POISON_SKELETONS = player;
 
                 new BukkitRunnable() {
                     @Override
                     public void run() {
-                        if (POISON_SKELETONS == null) cancel();
+                        if (basic1v1.POISON_SKELETONS == null) cancel();
 
                         for (LivingEntity entity : world.getLivingEntities()) {
                             if (entity.getScoreboardTags().contains("venomous")) {
@@ -836,6 +865,38 @@ public class WandUsage {
             case POWER_BOOST -> {
                 playerData.boostedAbilities = true;
                 Bukkit.getScheduler().runTaskLater(WizardDuels.getPlugin(WizardDuels.class), () -> playerData.boostedAbilities = false, RANDOM.nextLong(100, 180));
+            }
+            
+            // ========= POTION MASTER =========
+            case LITTLE_ACCIDENT -> {
+                ThrownPotion potion = player.launchProjectile(ThrownPotion.class);
+                PotionMeta meta = potion.getPotionMeta();
+                meta.addCustomEffect(new PotionEffect(Randomizer.fromCollection(BAD_EFFECTS), 10, 0), true);
+                meta.setColor(Color.WHITE);
+                potion.setPotionMeta(meta);
+            }
+            case COCKTAIL -> {
+                ThrownPotion potion = player.launchProjectile(ThrownPotion.class);
+                PotionMeta meta = potion.getPotionMeta();
+                meta.addCustomEffect(new PotionEffect(PotionEffectType.SPEED, 10, 2), false);
+                meta.addCustomEffect(new PotionEffect(PotionEffectType.FIRE_RESISTANCE, 10, 0), false);
+                meta.addCustomEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 10, 0), false);
+                meta.setColor(Color.GREEN);
+                potion.setPotionMeta(meta);
+            }
+            case MAGIC_CULT -> {
+                for (int i = 0; i < b(playerData, 6, 8); i++) {
+                    Monster entity = world.spawn(loc, (Class<? extends Monster>) (i > b(playerData, 3, 4) ? Evoker.class : Witch.class));
+                    entity.setTarget(opponentData.player);
+                    entity.setVelocity(player.getEyeLocation().getDirection().normalize().multiply(b(playerData, 2.5, 3)));
+                }
+            }
+            case ORANGE_JUICE -> {
+                ThrownPotion potion = player.launchProjectile(ThrownPotion.class);
+                PotionMeta meta = potion.getPotionMeta();
+                meta.addCustomEffect(new PotionEffect(Randomizer.fromCollection(GOOD_EFFECTS), 10, 0), true);
+                meta.setColor(Color.WHITE);
+                potion.setPotionMeta(meta);
             }
         }
     }

@@ -11,22 +11,23 @@ import org.bukkit.entity.Fireball;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockFromToEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.jetbrains.annotations.NotNull;
 
 public class SpellUseEvent implements Listener {
     @EventHandler
     public void onBlockPlace(@NotNull BlockPlaceEvent event) {
-        if (WizardDuels.currentMatch != null) return;
+        if (WizardDuels.currentMatch == null) return;
 
-        if (SpellUsage.spellUse(event.getBlockPlaced().getType(), event.getPlayer())) {
+        if (SpellUsage.spellUse(event.getBlock().getType(), event.getPlayer())) {
             event.setCancelled(true);
         }
     }
 
     @EventHandler
     public void onBlockBreak(@NotNull BlockBreakEvent event) {
-        if (WizardDuels.currentMatch != null) return;
+        if (WizardDuels.currentMatch == null) return;
 
         if (event.getBlock().getType() == Material.DARK_PRISMARINE) {
             World world = event.getPlayer().getWorld();
@@ -41,7 +42,7 @@ public class SpellUseEvent implements Listener {
 
     @EventHandler
     public void onProjectileHit(@NotNull PlayerLaunchProjectileEvent event) {
-        if (WizardDuels.currentMatch != null) return;
+        if (WizardDuels.currentMatch == null) return;
 
         Basic1v1 basic1v1 = (Basic1v1) WizardDuels.currentMatch;
         if (event.getProjectile() instanceof Fireball) {
@@ -60,5 +61,11 @@ public class SpellUseEvent implements Listener {
                 event.setCancelled(true);
             }
         }
+    }
+
+    // Preventing lava and water from flowing
+    @EventHandler
+    public void onBlockFromTo(@NotNull BlockFromToEvent event) {
+        if (event.getBlock().isLiquid()) event.setCancelled(true);
     }
 }
