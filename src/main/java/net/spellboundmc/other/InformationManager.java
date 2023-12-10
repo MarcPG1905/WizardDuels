@@ -1,10 +1,12 @@
 package net.spellboundmc.other;
 
+import me.marcpg1905.data.time.Time;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import net.spellboundmc.PlayerData;
 import net.spellboundmc.WizardDuels;
 import net.spellboundmc.match.Basic1v1;
+import net.spellboundmc.spells.Spell;
 import net.spellboundmc.wands.Wand;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -12,6 +14,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.scoreboard.*;
 import org.jetbrains.annotations.NotNull;
+import org.joml.Math;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,7 +27,7 @@ public class InformationManager {
 
     public static BukkitTask basicScoreboard;
     public static void startBasic(Basic1v1 match) {
-        basicScoreboard = Bukkit.getScheduler().runTaskTimer(WizardDuels.getPlugin(WizardDuels.class), () -> {
+        basicScoreboard = Bukkit.getScheduler().runTaskTimer(WizardDuels.PLUGIN, () -> {
             updateBasic(match, true);
             updateBasic(match, false);
 
@@ -69,32 +72,20 @@ public class InformationManager {
 
     public static void updateActionBar(@NotNull PlayerData playerData) {
         Material mainHandItem = playerData.player.getInventory().getItemInMainHand().getType();
-        Wand wand = Wand.NONE;
-        for (Wand tempWand : List.of(Wand.values())) {
-            if (tempWand.item == mainHandItem) {
-                wand = tempWand;
-                break;
-            }
+
+        Wand wand = Wand.getWand(mainHandItem);
+        if (wand != null) {
+            boolean sneaking = playerData.player.isSneaking();
+            var left = new Time(Math.max(0, sneaking ? playerData.abilityCooldowns.get(wand.slmb) : playerData.abilityCooldowns.get(wand.lmb)));
+            var right = new Time(Math.max(0, sneaking ? playerData.abilityCooldowns.get(wand.srmb) : playerData.abilityCooldowns.get(wand.rmb)));
+            playerData.player.sendActionBar(Component.text(left.getOneUnitFormatted() + " | " + right.getOneUnitFormatted(), TextColor.color(200, 200, sneaking ? 255 : 200)));
+            return;
         }
 
-        if (wand != Wand.NONE) {
-            boolean sneak = playerData.player.isSneaking();
-            int lmbCooldown = Math.max(0, playerData.abilityCooldowns.get(wand.abilities[sneak ? 2 : 0]));
-            System.out.println(lmbCooldown);
-            int rmbCooldown = Math.max(0, playerData.abilityCooldowns.get(wand.abilities[sneak ? 3 : 1]));
-            System.out.println(rmbCooldown);
-            playerData.player.sendActionBar(Component.text(lmbCooldown + "s | " + rmbCooldown + "s", sneak ? TextColor.color(150, 180, 255) : TextColor.color(255, 255, 255)));
-        } else {
-            if (!playerData.spellCooldowns.containsKey(mainHandItem)) return;
-
-            Integer cooldown = playerData.spellCooldowns.get(mainHandItem);
-            System.out.println(cooldown);
-
-            if (cooldown <= 0){
-                playerData.player.sendActionBar(Component.text(cooldown + "s", TextColor.color(255, 200, 200)));
-            } else {
-                playerData.player.sendActionBar(Component.text("Ready!", TextColor.color(200, 255, 200)));
-            }
+        Spell spell = Spell.getSpell(mainHandItem);
+        if (spell != null) {
+            var cooldown = new Time(Math.max(0, playerData.spellCooldowns.get(spell.item)));
+            playerData.player.sendActionBar(Component.text(cooldown + "s"));
         }
     }
 }

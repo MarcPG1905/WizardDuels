@@ -3,17 +3,14 @@ package net.spellboundmc.match;
 import me.marcpg1905.data.time.Time;
 import me.marcpg1905.data.time.Timer;
 import net.spellboundmc.WizardDuels;
-import net.spellboundmc.match.Basic1v1;
-import net.spellboundmc.match.Match;
-import net.spellboundmc.wands.Ability;
 import org.bukkit.Bukkit;
-import org.bukkit.Material;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class MatchTimer implements Timer {
+    public static final int LOCATION_QUEUE_SIZE = 10;
     private final Match match;
     private Time time;
     private BukkitTask timer;
@@ -25,7 +22,7 @@ public class MatchTimer implements Timer {
 
     @Override
     public void start() {
-        timer = Bukkit.getScheduler().runTaskTimer(WizardDuels.getPlugin(WizardDuels.class), () -> {
+        timer = Bukkit.getScheduler().runTaskTimer(WizardDuels.PLUGIN, () -> {
             time.decrement();
 
             if (match instanceof Basic1v1 basic1v1) {
@@ -41,6 +38,12 @@ public class MatchTimer implements Timer {
                 if (basic1v1.playerData2.spellCrystalActive) {
                     basic1v1.player2.setHealth(basic1v1.player2.getHealth() + 1);
                 }
+
+                basic1v1.playerData1.locationQueue.addFirst(basic1v1.player1.getLocation());
+                if (basic1v1.playerData1.locationQueue.size() > LOCATION_QUEUE_SIZE) basic1v1.playerData1.locationQueue.removeLast();
+
+                basic1v1.playerData2.locationQueue.addFirst(basic1v1.player2.getLocation());
+                if (basic1v1.playerData2.locationQueue.size() > LOCATION_QUEUE_SIZE) basic1v1.playerData2.locationQueue.removeLast();
             }
 
             if (time.getAs(Time.Unit.MINUTES) == 5) match.withering();

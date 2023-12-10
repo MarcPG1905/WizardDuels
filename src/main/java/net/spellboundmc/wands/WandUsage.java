@@ -7,9 +7,9 @@ import net.kyori.adventure.sound.SoundStop;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.title.Title;
 import net.spellboundmc.PlayerData;
-import net.spellboundmc.other.Translation;
 import net.spellboundmc.WizardDuels;
 import net.spellboundmc.match.Basic1v1;
+import net.spellboundmc.other.Translation;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -249,6 +249,8 @@ public class WandUsage {
                 fireball.setGravity(true);
             }
             case DRAGONS_WINGS -> {
+                player.playSound(loc, Sound.ENTITY_ENDER_DRAGON_FLAP, 1f, 1f);
+
                 player.setAllowFlight(true);
                 player.setFlying(true);
 
@@ -392,7 +394,7 @@ public class WandUsage {
                 horse.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, -1, 1, true, false));
 
                 new BukkitRunnable() {
-                    public int ticks = 0;
+                    private int ticks = 0;
                     @Override
                     public void run() {
                         Location horseLoc = horse.getLocation();
@@ -408,15 +410,12 @@ public class WandUsage {
                             r += 0.005;
                         }
 
-                        for (Player player : world.getPlayers()) {
-                            if (player != basic1v1.TORNADO && player.getLocation().distance(horseLoc) < 10) {
-                                Vector direction = horseLoc.toVector().subtract(player.getLocation().toVector()).normalize();
-                                player.setVelocity(direction.multiply(0.06));
-                            }
+                        for (Entity entity : horse.getNearbyEntities(30, 30, 30)) {
+                            Vector direction = horseLoc.toVector().subtract(entity.getLocation().toVector()).normalize();
+                            entity.setVelocity(direction.multiply(0.06));
                         }
 
-                        ticks++;
-                        ticks++;
+                        ticks += 2;
                         if (ticks >= 300) {
                             horse.remove();
                             cancel();
@@ -425,19 +424,56 @@ public class WandUsage {
                 }.runTaskTimer(WizardDuels.getPlugin(WizardDuels.class), 5, 2);
             }
 
-            // TODO: ===== TIME WAND ===========
-            case TIME_FREEZE -> {
-                // Throw clock as a projectile
-                // Create a field, where all players in it have 50% movement and attack speed
-            }
+            // TODO: ===== TIME WARP ===========
+            case TIME_FREEZE -> new BukkitRunnable() {
+                private int counter;
+                @Override
+                public void run() {
+                    generate3dBall(player.getLocation(), 8.0, 30, new ParticleBuilder(Particle.REDSTONE).color(255, 255, 0));
+
+                    for (Entity entity : player.getNearbyEntities(16, 16, 16)) {
+                        entity.setVelocity(entity.getVelocity().multiply(0.5));
+                        if (entity instanceof Player p && p.getAttackCooldown() > 2) {
+                            p.setCooldown(p.getInventory().getItemInMainHand().getType(), (int) (p.getAttackCooldown() * 2));
+                        }
+                    }
+
+                    counter++;
+                    if (counter >= 100) cancel();
+                }
+            }.runTaskTimer(WizardDuels.getPlugin(WizardDuels.class), 1, 1);
             case CTRL_Z -> {
-                // Log movements of each player
-                // Teleport player to that location
+                Location timeDestination = playerData.locationQueue.get(5);
+                if (timeDestination == null) {
+                    player.sendMessage(Translation.get(l, "wand.time.time_error"));
+                    return;
+                }
+                player.teleport(timeDestination);
             }
-            case PARADOX_SHIELD -> {
-                // Create time-warp bubble around player
-                // Stop projectiles from entering that bubble
-            }
+            case PARADOX_SHIELD -> new BukkitRunnable() {
+                private int counter;
+                @Override
+                public void run() {
+                    generate3dBall(player.getLocation(), 4.0, 30, new ParticleBuilder(Particle.REDSTONE).color(255, 255, 0));
+
+                    for (Entity entity : player.getNearbyEntities(8, 8, 8)) {
+                        if (entity instanceof Projectile projectile) {
+                            projectile.setVelocity(new Vector());
+                        }
+                    }
+
+                    counter++;
+                    if (counter >= 100) {
+                        for (Entity entity : player.getNearbyEntities(10, 10, 10)) {
+                            if (entity instanceof Projectile projectile) {
+                                Vector direction = projectile.getLocation().toVector().subtract(player.getLocation().toVector()).normalize();
+                                projectile.setVelocity(direction.multiply(1.2));
+                            }
+                        }
+                        cancel();
+                    }
+                }
+            }.runTaskTimer(WizardDuels.getPlugin(WizardDuels.class), 1, 2);
             case CLONE -> {
                 // Clone the player 2 blocks before him
                 // Mimic the player's movements 1:1
@@ -955,6 +991,24 @@ public class WandUsage {
             }
 
             distanceTraveled++;
+        }
+    }
+
+    public static void generate3dBall(@NotNull Location center, double radius, int points, ParticleBuilder particle) {
+        double centerX = center.x();
+        double centerY = center.y();
+        double centerZ = center.z();
+
+        for (int i = 0; i < points; i++) {
+            for (int j = 0; j < points; j++) {
+                double theta = 2 * Math.PI * i / points;
+                double phi = Math.PI * j / points;
+                double x = centerX + radius * Math.sin(phi) * Math.cos(theta);
+                double y = centerY + radius * Math.cos(phi);
+                double z = centerZ + radius * Math.sin(phi) * Math.sin(theta);
+
+                particle.location(center.getWorld(), x, y, z).spawn();
+            }
         }
     }
 }

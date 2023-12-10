@@ -1,0 +1,18 @@
+# Should usually match the number given in the velocity config
+game-id: 0
+
+# If normal players without special permissions are allowed to join
+allow-join: true
+
+# If the match is used for experimental or debugging purposes. Will disable allow-join automatically.
+experimental: false
+
+# If set to true, the game will use the competitive/ranked game rules
+competitive: false
+
+# What match types are allowed to be started
+# Valid options are: 'normal', 'duo', 'chaos'
+allow-types:
+  - 'normal'
+  - 'duo'
+  - 'chaos'

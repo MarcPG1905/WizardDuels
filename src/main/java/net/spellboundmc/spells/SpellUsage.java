@@ -14,11 +14,9 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
-import java.util.Locale;
 
 public class SpellUsage {
     public static boolean spellUse(Material spell, @NotNull Player player) {
-        Locale l = player.locale();
         Location loc = player.getLocation();
         World world = player.getWorld();
 
@@ -63,7 +61,7 @@ public class SpellUsage {
                     world.spawn(randomLocation, EnderCrystal.class);
                 }
             }
-            case NETHERRACK -> Bukkit.getScheduler().runTaskLater(WizardDuels.getPlugin(WizardDuels.class), () -> {
+            case NETHERRACK -> Bukkit.getScheduler().runTaskLater(WizardDuels.PLUGIN, () -> {
                 playerData.spellCooldowns.put(spell, Integer.MAX_VALUE);
                 playerData.fireballsLeft = 2;
                 world.spawn(loc.add(loc.getDirection().multiply(1)), Fireball.class);
@@ -81,7 +79,7 @@ public class SpellUsage {
                         if (!opponentData.thunderEffect) cancel();
                         world.strikeLightning(opponentData.player.getLocation());
                     }
-                }.runTaskTimer(WizardDuels.getPlugin(WizardDuels.class), 0, 300);
+                }.runTaskTimer(WizardDuels.PLUGIN, 0, 300);
             }
             case SMITHING_TABLE -> {
                 if (player.getInventory().contains(Material.IRON_SWORD)) {
@@ -89,7 +87,7 @@ public class SpellUsage {
                     player.getInventory().addItem(new ItemStack(Material.DIAMOND_SWORD));
                     playerData.spellCooldowns.put(spell, 35);
 
-                    Bukkit.getScheduler().runTaskLater(WizardDuels.getPlugin(WizardDuels.class), () -> {
+                    Bukkit.getScheduler().runTaskLater(WizardDuels.PLUGIN, () -> {
                         player.getInventory().remove(Material.DIAMOND_SWORD);
                         player.getInventory().addItem(new ItemStack(Material.IRON_SWORD));
                     }, 300);
@@ -108,7 +106,7 @@ public class SpellUsage {
                     player.getInventory().addItem(bow);
                     playerData.spellCooldowns.put(spell, 80);
 
-                    Bukkit.getScheduler().runTaskLater(WizardDuels.getPlugin(WizardDuels.class), () -> {
+                    Bukkit.getScheduler().runTaskLater(WizardDuels.PLUGIN, () -> {
                         player.getInventory().remove(Material.BOW);
                         player.getInventory().addItem(new ItemStack(Material.IRON_SWORD));
                     }, 400);
