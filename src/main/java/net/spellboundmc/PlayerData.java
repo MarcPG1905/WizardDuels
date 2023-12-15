@@ -1,10 +1,9 @@
 package net.spellboundmc;
 
-import net.spellboundmc.spells.Spell;
-import net.spellboundmc.wands.Ability;
-import net.spellboundmc.wands.Wand;
+import net.spellboundmc.turn.spells.Spell;
+import net.spellboundmc.turn.wands.Ability;
+import net.spellboundmc.turn.wands.Wand;
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.entity.Player;
 
 import java.util.*;
@@ -12,23 +11,24 @@ import java.util.*;
 public class PlayerData {
 
     public final Player player;
-    public final HashMap<Material, Integer> spellCooldowns = new HashMap<>(Map.of(
-            Material.GRASS_BLOCK, 0,
-            Material.END_CRYSTAL, 0,
-            Material.NETHERRACK, 0,
-            Material.DARK_PRISMARINE, 0,
-            Material.SMITHING_TABLE, 0,
-            Material.FLETCHING_TABLE, 0,
-            Material.WATER_BUCKET, 0,
-            Material.LAVA_BUCKET, 0
+    public final HashMap<Spell, Integer> spellCooldowns = new HashMap<>(Map.of(
+            Spell.GRASS_BLOCK, 0,
+            Spell.END_CRYSTAL, 0,
+            Spell.NETHERRACK, 0,
+            Spell.DARK_PRISMARINE, 0,
+            Spell.SMITHING_TABLE, 0,
+            Spell.FLETCHING_TABLE, 0,
+            Spell.WATER, 0,
+            Spell.LAVA, 0
     ));
     public final LinkedList<Location> locationQueue = new LinkedList<>();
     public final HashMap<Ability, Integer> abilityCooldowns = new HashMap<>();
+    public final List<Spell> spells = new ArrayList<>();
     public boolean wandCrystalActive, spellCrystalActive, disabledWands, boostedAbilities, thunderEffect, spellLuck25;
     public int fireballsLeft, lavaBucketLevel = 1, waterBucketLevel = 1;
     public int tokens;
+    public boolean shopDone;
     public Wand selectedWand;
-    public List<Spell> spells = new ArrayList<>();
 
 
     public PlayerData(Player player) {

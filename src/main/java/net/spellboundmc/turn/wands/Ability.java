@@ -1,7 +1,7 @@
-package net.spellboundmc.wands;
+package net.spellboundmc.turn.wands;
 
 import me.marcpg1905.util.Formatter;
-import net.spellboundmc.Turn;
+import net.spellboundmc.turn.Turn;
 import net.spellboundmc.other.Translation;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;

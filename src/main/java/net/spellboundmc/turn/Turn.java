@@ -1,4 +1,4 @@
-package net.spellboundmc;
+package net.spellboundmc.turn;
 
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;

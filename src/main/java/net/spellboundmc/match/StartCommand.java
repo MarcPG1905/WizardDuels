@@ -3,6 +3,7 @@ package net.spellboundmc.match;
 import me.marcpg1905.text.Completer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
+import net.spellboundmc.Config;
 import net.spellboundmc.WizardDuels;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
@@ -32,13 +33,15 @@ public class StartCommand implements CommandExecutor, TabExecutor {
                 return true;
             }
 
+            if (Config.DISALLOWED_TYPES.contains(args[0])) {
+                player1.sendMessage(Component.text(args[0] + " games are disabled in this match!", TextColor.color(255, 0, 0)));
+                return true;
+            }
+
             if (args[0].equals("1v1")) {
                 WizardDuels.currentMatch = new Basic1v1(player1, player2);
                 sender.sendMessage(Component.text("Starting a 1v1...", TextColor.color(0, 255, 0)));
-            } else if (args[0].equals("random")) {
-                WizardDuels.currentMatch = new Basic1v1(player1, player2);
-                sender.sendMessage(Component.text("Starting a 1v1...", TextColor.color(0, 255, 0)));
-            }else {
+            } else {
                 sender.sendMessage(Component.text("Invalid match type. Valid one for now are: 1v1", TextColor.color(255, 0, 0)));
             }
 
@@ -48,11 +51,13 @@ public class StartCommand implements CommandExecutor, TabExecutor {
         return false;
     }
 
-    private static final String[] MATCH_TYPES = { "1v1", "2v2", "chaos", "random" };
+    final List<String> matchTypes = List.of("1v1", "2v2", "chaos");
     @Override
     public @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
         if (args.length == 1) {
-            return Completer.startComplete(args[0], MATCH_TYPES);
+            List<String> strings = new ArrayList<>(matchTypes);
+            strings.removeAll(Config.DISALLOWED_TYPES);
+            return Completer.startComplete(args[0], strings);
         } else if (args.length == 2) {
             if (sender instanceof Player player) {
                 List<String> playerNames = new ArrayList<>();

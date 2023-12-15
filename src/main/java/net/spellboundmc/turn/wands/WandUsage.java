@@ -1,4 +1,4 @@
-package net.spellboundmc.wands;
+package net.spellboundmc.turn.wands;
 
 import com.destroystokyo.paper.ParticleBuilder;
 import me.marcpg1905.color.McFormat;
@@ -10,6 +10,7 @@ import net.spellboundmc.PlayerData;
 import net.spellboundmc.WizardDuels;
 import net.spellboundmc.match.Basic1v1;
 import net.spellboundmc.other.Translation;
+import net.spellboundmc.turn.TurnData;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -27,6 +28,7 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.Consumer;
 
@@ -268,7 +270,7 @@ public class WandUsage {
             case DRAGON -> {
                 // EnderDragon dragon = world.spawn(player.getLocation(), EnderDragon.class);
                 // dragon.setTarget(opponentData.player);
-//
+                //
                 // new BukkitRunnable() {
                 //     @Override
                 //     public void run() {
@@ -935,6 +937,7 @@ public class WandUsage {
                 potion.setPotionMeta(meta);
             }
         }
+        basic1v1.history.add(new TurnData(ability, true, playerData, LocalDateTime.now()));
     }
 
     @Contract(pure = true)

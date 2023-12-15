@@ -6,8 +6,8 @@ import net.kyori.adventure.text.format.TextColor;
 import net.spellboundmc.PlayerData;
 import net.spellboundmc.WizardDuels;
 import net.spellboundmc.match.Basic1v1;
-import net.spellboundmc.spells.Spell;
-import net.spellboundmc.wands.Wand;
+import net.spellboundmc.turn.spells.Spell;
+import net.spellboundmc.turn.wands.Wand;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -32,8 +32,8 @@ public class InformationManager {
             updateBasic(match, false);
 
             updateActionBar(match.playerData1);
-            updateActionBar(match.playerData1);
-        }, 0, 5);
+            updateActionBar(match.playerData2);
+        }, 0, 20);
     }
 
     public static void updateBasic(@NotNull Basic1v1 match, boolean team1) {
@@ -41,7 +41,7 @@ public class InformationManager {
         Locale l = player.locale();
 
         Scoreboard scoreboard = manager.getNewScoreboard();
-        Objective objective = scoreboard.registerNewObjective("basic1v1", Criteria.DUMMY, Component.text(RED + "Wizard " + BLUE + "Duels" + RESET + "1v1"));
+        Objective objective = scoreboard.registerNewObjective("basic1v1", Criteria.DUMMY, Component.text(RED + "Wizard " + BLUE + "Duels " + RESET + "1v1"));
         objective.setDisplaySlot(DisplaySlot.SIDEBAR);
 
         List<Score> scores = new ArrayList<>();
@@ -82,10 +82,10 @@ public class InformationManager {
             return;
         }
 
-        Spell spell = Spell.getSpell(mainHandItem);
+        Spell spell = Spell.getSpellShop(mainHandItem);
         if (spell != null) {
-            var cooldown = new Time(Math.max(0, playerData.spellCooldowns.get(spell.item)));
-            playerData.player.sendActionBar(Component.text(cooldown + "s"));
+            var cooldown = new Time(Math.max(0, playerData.spellCooldowns.get(spell)));
+            playerData.player.sendActionBar(Component.text(cooldown.getOneUnitFormatted() + "s"));
         }
     }
 }

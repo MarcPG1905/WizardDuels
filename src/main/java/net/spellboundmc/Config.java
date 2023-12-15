@@ -19,14 +19,16 @@ public class Config implements CommandExecutor, TabExecutor {
     public static boolean ALLOW_JOIN;
     public static boolean EXPERIMENTAL;
     public static boolean COMPETITIVE;
-    public static List<String> ALLOW_TYPES;
+    public static boolean LOCALIZATION;
+    public static List<String> DISALLOWED_TYPES;
 
     public static void init(@NotNull FileConfiguration config) {
         GAME_ID = config.getInt("game-id");
         ALLOW_JOIN = config.getBoolean("allow-join");
         EXPERIMENTAL = config.getBoolean("experimental");
         COMPETITIVE = config.getBoolean("competitive");
-        ALLOW_TYPES = Objects.requireNonNull(config.getStringList("allow-types"));
+        LOCALIZATION = config.getBoolean("localization");
+        DISALLOWED_TYPES = Objects.requireNonNull(config.getStringList("disallowed-types"));
     }
 
     @Override
@@ -40,6 +42,10 @@ public class Config implements CommandExecutor, TabExecutor {
                 sender.sendMessage(Component.text("The key " + args[1] + " could not be found!", TextColor.color(255, 0, 0)));
                 return true;
             }
+            if (args[1].equals("allow-types")) {
+                sender.sendMessage(Component.text("You can't set lists, due to technical limitations!", TextColor.color(255, 0, 0)));
+                return true;
+            }
 
             WizardDuels.PLUGIN.getConfig().set(args[1], args[2]);
             WizardDuels.PLUGIN.saveConfig();
@@ -48,10 +54,6 @@ public class Config implements CommandExecutor, TabExecutor {
         } else if (args[0].equals("get") && args.length == 2) {
             if (!WizardDuels.PLUGIN.getConfig().contains(args[1])) {
                 sender.sendMessage(Component.text("The key " + args[1] + " could not be found!", TextColor.color(255, 0, 0)));
-                return true;
-            }
-            if (args[1].equals("allow-types")) {
-                sender.sendMessage(Component.text("You can't set lists, due to technical limitations!", TextColor.color(255, 0, 0)));
                 return true;
             }
             sender.sendMessage(Component.text(args[1] + " = " + WizardDuels.PLUGIN.getConfig().get(args[1])));
@@ -67,7 +69,7 @@ public class Config implements CommandExecutor, TabExecutor {
     }
 
 
-    private static final String[] KEYS = { "game-id", "allow-join", "experimental", "competitive" };
+    private static final List<String> KEYS = List.of("game-id", "allow-join", "experimental", "competitive", "localization");
     @Override
     public @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
         if (args.length == 1) {
@@ -75,7 +77,7 @@ public class Config implements CommandExecutor, TabExecutor {
         } else if (args.length == 2 && (args[0].equals("get") || args[0].equals("set"))) {
             return Completer.containComplete(args[1], KEYS);
         } else if (args.length == 3 && args[0].equals("set")) {
-            if (args[1].equals("allow-join") || args[1].equals("experimental") || args[1].equals("competitive")) {
+            if (KEYS.contains(args[2]) && args[2].equals("game-id")) {
                 return Completer.startComplete(args[2], List.of("true", "false"));
             }
         }

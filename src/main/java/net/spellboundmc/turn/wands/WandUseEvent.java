@@ -1,4 +1,4 @@
-package net.spellboundmc.wands;
+package net.spellboundmc.turn.wands;
 
 import io.papermc.paper.event.entity.EntityMoveEvent;
 import me.marcpg1905.color.McFormat;
@@ -8,6 +8,7 @@ import net.spellboundmc.PlayerData;
 import net.spellboundmc.WizardDuels;
 import net.spellboundmc.match.Basic1v1;
 import net.spellboundmc.other.Translation;
+import net.spellboundmc.turn.spells.Spell;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.enchantments.Enchantment;
@@ -415,11 +416,11 @@ public class WandUseEvent implements Listener {
             }
             if (basic1v1.playerData1.spellCrystalActive) {
                 basic1v1.player1.setHealth(basic1v1.player1.getHealth() + 10);
-                basic1v1.playerData1.spellCooldowns.put(Material.END_CRYSTAL, 35);
+                basic1v1.playerData1.spellCooldowns.put(Spell.END_CRYSTAL, 35);
             }
             if (basic1v1.playerData2.spellCrystalActive) {
                 basic1v1.player2.setHealth(basic1v1.player2.getHealth() + 10);
-                basic1v1.playerData2.spellCooldowns.put(Material.END_CRYSTAL, 35);
+                basic1v1.playerData2.spellCooldowns.put(Spell.END_CRYSTAL, 35);
             }
         }
         if (event.getEntity().getType() == EntityType.SKELETON) {

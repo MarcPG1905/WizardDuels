@@ -3,11 +3,11 @@ package net.spellboundmc.match;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.title.Title;
 import net.spellboundmc.PlayerData;
-import net.spellboundmc.Turn;
 import net.spellboundmc.WizardDuels;
 import net.spellboundmc.other.GuiEvents;
 import net.spellboundmc.other.InformationManager;
 import net.spellboundmc.other.Translation;
+import net.spellboundmc.turn.TurnData;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -27,14 +27,14 @@ import static me.marcpg1905.color.McFormat.*;
  * Duos2v2 is where two players compete with each other.
  */
 public class Basic1v1 implements Match {
-    public final List<Turn> history = new ArrayList<>();
+    public final List<TurnData> history = new ArrayList<>();
     public final Player player1;
     public final Player player2;
     public final PlayerData playerData1;
     public final PlayerData playerData2;
     public final MatchTimer timer;
     public String mapSize = "ERROR";
-    public Player ICE_STORM, FIRE_RING, STORM_WALL, ICY_FEET, OPPONENTS_NO_MOVEMENT, POISON_SKELETONS, NO_GRAVITATION;
+    public Player ICE_STORM, FIRE_RING, ICY_FEET, OPPONENTS_NO_MOVEMENT, POISON_SKELETONS;
     public PrePhase prePhase = PrePhase.NONE;
 
     public Basic1v1(@NotNull Player player1, @NotNull Player player2) {
@@ -45,10 +45,6 @@ public class Basic1v1 implements Match {
 
         timer = new MatchTimer(this);
 
-        nextPrePhase();
-    }
-
-    public void startPrePhase() {
         nextPrePhase();
     }
 
@@ -75,10 +71,10 @@ public class Basic1v1 implements Match {
                     item(Material.RED_WOOL, Component.text("Huge (128x128)"))
             );
             case TOKEN_AMOUNT -> GuiEvents.createInv(player2, 1, new int[]{ 0, 1, 4, 7, 8 }, "Choose the token amount!",
-                    item(Material.CYAN_WOOL, Component.text("Poor (10 Tokens)")),
-                    item(Material.LIME_WOOL, Component.text("Low (20 Tokens)")),
-                    item(Material.YELLOW_WOOL, Component.text("High (40 Tokens)")),
-                    item(Material.ORANGE_WOOL, Component.text("Rich (80 Tokens)"))
+                    item(Material.CYAN_WOOL, Component.text("Poor (15 Tokens)")),
+                    item(Material.LIME_WOOL, Component.text("Low (25 Tokens)")),
+                    item(Material.YELLOW_WOOL, Component.text("Normal (35 Tokens)")),
+                    item(Material.ORANGE_WOOL, Component.text("High (50 Tokens)"))
             );
             case WEATHER -> GuiEvents.createInv(player1, 1, new int[]{ 0, 1, 3, 5, 7, 8 }, "Choose the weather!",
                     item(Material.BLUE_WOOL, Component.text("Rain")),
@@ -88,8 +84,14 @@ public class Basic1v1 implements Match {
         }
     }
 
-    @Override
     public void startMain() {
+        player1.addPotionEffect(new PotionEffect(PotionEffectType.HEALTH_BOOST, -1, 3, true, false));
+        player2.addPotionEffect(new PotionEffect(PotionEffectType.HEALTH_BOOST, -1, 3, true, false));
+        player1.addPotionEffect(new PotionEffect(PotionEffectType.SATURATION, -1, 0, true, false));
+        player2.addPotionEffect(new PotionEffect(PotionEffectType.SATURATION, -1, 0, true, false));
+        player1.setHealth(40);
+        player2.setHealth(40);
+
         timer.start();
         InformationManager.startBasic(this);
     }

@@ -10,8 +10,6 @@ public interface Match {
         SHOP
     }
 
-    void startPrePhase();
-    void startMain();
     void stop();
     void withering();
 }

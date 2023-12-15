@@ -1,11 +1,12 @@
-package net.spellboundmc.spells;
+package net.spellboundmc.turn.spells;
 
 import me.marcpg1905.color.McFormat;
 import net.kyori.adventure.text.Component;
 import net.spellboundmc.PlayerData;
 import net.spellboundmc.WizardDuels;
 import net.spellboundmc.match.Basic1v1;
-import net.spellboundmc.wands.WandUsage;
+import net.spellboundmc.turn.TurnData;
+import net.spellboundmc.turn.wands.WandUsage;
 import org.bukkit.*;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.*;
@@ -13,10 +14,11 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 
 public class SpellUsage {
-    public static boolean spellUse(Material spell, @NotNull Player player) {
+    public static boolean spellUse(Spell spell, @NotNull Player player) {
         Location loc = player.getLocation();
         World world = player.getWorld();
 
@@ -25,14 +27,14 @@ public class SpellUsage {
         PlayerData playerData = basic1v1.player1 == player ? basic1v1.playerData1 : basic1v1.playerData2;
         PlayerData opponentData = basic1v1.player1 == player ? basic1v1.playerData2 : basic1v1.playerData1;
 
-        HashMap<Material, Integer> map = playerData.spellCooldowns;
+        HashMap<Spell, Integer> map = playerData.spellCooldowns;
         if (map.get(spell) == null) {
             player.sendMessage("Missing spell entry!");
             WizardDuels.LOG.warning("Missing spell entry: " + spell.name() + " for " + player.getName());
         } else if (map.get(spell) >= 0) {
             player.playSound(loc, Sound.ENTITY_VILLAGER_NO, 0.25f, 1.0f);
             player.sendMessage("You're using your spells too fast, cool down!");
-            return true;
+            return false;
         }
 
         switch (spell) {
@@ -53,7 +55,7 @@ public class SpellUsage {
 
                 if (worldHasCrystal) {
                     player.sendMessage(Component.text(McFormat.RED + "There is already a crystal. Destroy it first, before summoning your own!"));
-                    return true;
+                    return false;
                 } else {
                     playerData.spellCooldowns.put(spell, Integer.MAX_VALUE);
                     playerData.spellCrystalActive = true;
@@ -93,7 +95,7 @@ public class SpellUsage {
                     }, 300);
                 } else {
                     player.sendMessage(Component.text("You can only use the smithing table when you have a sword!"));
-                    return true;
+                    return false;
                 }
             }
             case FLETCHING_TABLE -> {
@@ -112,7 +114,7 @@ public class SpellUsage {
                     }, 400);
                 } else {
                     player.sendMessage(Component.text("You can only use the fletching table when you have a sword!"));
-                    return true;
+                    return false;
                 }
             }
             case OBSIDIAN -> playerData.spellLuck25 = true;
@@ -137,6 +139,7 @@ public class SpellUsage {
                 if (playerData.waterBucketLevel < 3) playerData.waterBucketLevel++;
             }
         }
-        return false;
+        basic1v1.history.add(new TurnData(spell, true, playerData, LocalDateTime.now()));
+        return true;
     }
 }

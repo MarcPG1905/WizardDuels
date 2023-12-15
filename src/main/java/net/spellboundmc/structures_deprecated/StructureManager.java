@@ -17,7 +17,7 @@ import java.util.HashSet;
 
 @Deprecated
 public class StructureManager {
-    public static HashSet<Structure> LOADED_STRUCTURES = new HashSet<>();
+    public final static HashSet<Structure> LOADED_STRUCTURES = new HashSet<>();
     private static final Gson GSON = new Gson();
     private static final File STRUCTURE_FILE = new File(WizardDuels.DATA_FOLDER, "structures.json");
 

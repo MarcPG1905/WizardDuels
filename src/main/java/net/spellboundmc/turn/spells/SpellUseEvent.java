@@ -1,4 +1,4 @@
-package net.spellboundmc.spells;
+package net.spellboundmc.turn.spells;
 
 import com.destroystokyo.paper.event.player.PlayerLaunchProjectileEvent;
 import net.spellboundmc.PlayerData;
@@ -7,6 +7,7 @@ import net.spellboundmc.match.Basic1v1;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Fireball;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -20,8 +21,14 @@ public class SpellUseEvent implements Listener {
     public void onBlockPlace(@NotNull BlockPlaceEvent event) {
         if (WizardDuels.currentMatch == null) return;
 
-        if (SpellUsage.spellUse(event.getBlock().getType(), event.getPlayer())) {
-            event.setCancelled(true);
+        event.setCancelled(true);
+
+        Spell spell = Spell.getSpellPlaced(event.getBlock().getType());
+        if (spell == null) return;
+
+        if (SpellUsage.spellUse(spell, event.getPlayer())) {
+            Block block = event.getBlockPlaced();
+            block.setType(block.getType());
         }
     }
 
@@ -37,6 +44,8 @@ public class SpellUseEvent implements Listener {
             Basic1v1 basic1v1 = (Basic1v1) WizardDuels.currentMatch;
             (event.getPlayer() == basic1v1.player1 ? basic1v1.playerData1 : basic1v1.playerData2).thunderEffect = false;
             (event.getPlayer() == basic1v1.player1 ? basic1v1.playerData2 : basic1v1.playerData1).thunderEffect = false;
+        } else {
+            event.setCancelled(true);
         }
     }
 
@@ -55,7 +64,7 @@ public class SpellUseEvent implements Listener {
                 loc.getWorld().spawn(loc.add(loc.getDirection().multiply(1)), Fireball.class);
 
                 if (data.fireballsLeft < 0) {
-                    data.spellCooldowns.put(Material.NETHERRACK, 15);
+                    data.spellCooldowns.put(Spell.NETHERRACK, 15);
                 }
             } else if (dataOpponent.fireballsLeft >= 0) {
                 event.setCancelled(true);

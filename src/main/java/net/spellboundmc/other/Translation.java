@@ -1,6 +1,7 @@
 package net.spellboundmc.other;
 
 import com.opencsv.CSVReader;
+import net.spellboundmc.Config;
 import net.spellboundmc.WizardDuels;
 import org.jetbrains.annotations.NotNull;
 
@@ -26,7 +27,11 @@ public class Translation {
 
     public static String get(Locale locale, String key) {
         key = key.toLowerCase(Locale.ROOT).replace(" ", "");
-        if (EN_ENGLISH.get(key) == null) throw new IllegalArgumentException("Translation-Key not found!");
+
+        String en = EN_ENGLISH.get(key);
+        if (en == null) throw new IllegalArgumentException("String not found!");
+
+        if (!Config.LOCALIZATION) return en;
 
         return switch (locale.getLanguage().toUpperCase()) {
             case "DE" -> DE_GERMAN.get(key);
@@ -35,7 +40,7 @@ public class Translation {
             case "LOL" -> LOL_LOLCAT.get(key);
             case "LA" -> LA_LATIN.get(key);
             case "ES" -> ES_SPAIN.get(key);
-            default -> EN_ENGLISH.get(key);
+            default -> en;
         };
     }
 

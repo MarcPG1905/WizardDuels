@@ -6,8 +6,8 @@ import net.kyori.adventure.text.format.TextDecoration;
 import net.spellboundmc.PlayerData;
 import net.spellboundmc.WizardDuels;
 import net.spellboundmc.match.Basic1v1;
-import net.spellboundmc.spells.Spell;
-import net.spellboundmc.wands.Wand;
+import net.spellboundmc.turn.spells.Spell;
+import net.spellboundmc.turn.wands.Wand;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -37,7 +37,6 @@ public class GuiEvents implements Listener {
     @EventHandler
     public void onInventoryClick(@NotNull InventoryClickEvent event) {
         if (WizardDuels.currentMatch == null) return;
-
         if (Objects.requireNonNull(event.getCurrentItem()).getType() == Material.LIGHT_GRAY_STAINED_GLASS) return;
 
         String title = ((TextComponent) event.getView().title()).content().toLowerCase();
@@ -102,6 +101,7 @@ public class GuiEvents implements Listener {
                                 match.player1.closeInventory(InventoryCloseEvent.Reason.PLUGIN);
                                 match.player2.closeInventory(InventoryCloseEvent.Reason.PLUGIN);
                                 match.startMain();
+                                cancel();
                             }
                         }
                     }.runTaskTimer(WizardDuels.PLUGIN, 0, 20);
@@ -117,6 +117,7 @@ public class GuiEvents implements Listener {
             if (item == Material.BLACK_STAINED_GLASS_PANE) return;
 
             Player player = (Player) event.getWhoClicked();
+            PlayerData playerData = (match.player1 == player ? match.playerData1 : match.playerData2);
 
             if (title.contains("wands")) {
                 if (item == Material.DIRT) {
@@ -124,7 +125,8 @@ public class GuiEvents implements Listener {
                 } else if (item != Material.STICK && item != Material.AIR) {
                     Wand wand = Wand.getWand(item);
                     if (wand != null) {
-                        player.getInventory().setItem(1, new ItemStack(wand.item));
+                        player.getInventory().setItem(0, new ItemStack(wand.item));
+                        playerData.selectedWand = wand;
                     }
                 }
             } else if (title.contains("spells")) {
@@ -137,13 +139,18 @@ public class GuiEvents implements Listener {
                 } else if (item == Material.RED_DYE) {
                     displayShop(player, false, Math.max(1, currentPage - 1));
                 } else if (item != Material.DIRT && item != Material.AIR) {
-                    Spell spell = Spell.getSpell(item);
+                    Spell spell = Spell.getSpellShop(item);
                     if (spell != null) {
-                        PlayerData playerData = (match.player1 == player ? match.playerData1 : match.playerData2);
-                        if (playerData.tokens >= spell.price && player.getInventory().getItem(8) != null && !Objects.requireNonNull(player.getInventory().getItem(8)).isEmpty()) {
+                        if (playerData.tokens >= spell.price && (player.getInventory().getItem(7) == null || Objects.requireNonNull(player.getInventory().getItem(7)).isEmpty())) {
                             playerData.tokens -= spell.price;
+                            player.getInventory().addItem(new ItemStack(spell.shopItem));
+                            playerData.spells.add(spell);
+                            player.playSound(player, Sound.ENTITY_VILLAGER_YES, 1.0f, 1.0f);
                             player.getInventory().setItem(12, new ItemStack(Material.GOLD_NUGGET, playerData.tokens));
-                            player.getInventory().addItem(new ItemStack(item, 64));
+
+                            if (player.getInventory().getItem(7) != null || !Objects.requireNonNull(player.getInventory().getItem(7)).isEmpty()) {
+                                playerData.shopDone = true;
+                            }
                         } else {
                             player.playSound(player, Sound.ENTITY_VILLAGER_NO, 1.0f, 1.0f);
                         }
@@ -171,14 +178,14 @@ public class GuiEvents implements Listener {
         player.openInventory(inv);
     }
 
-    public static void startShopDisplay(Player player, PlayerData playerData) {
+    public static void startShopDisplay(Player player, @NotNull PlayerData playerData) {
         displayShop(player, true, 1);
-        player.getInventory().setItem(0, new ItemStack(Material.IRON_SWORD));
-        player.getInventory().setItem(1, new ItemStack(Material.GRAY_STAINED_GLASS_PANE));
+        player.getInventory().setItem(8, new ItemStack(Material.STONE_SWORD));
+        player.getInventory().setItem(0, new ItemStack(Material.GRAY_STAINED_GLASS_PANE));
         player.getInventory().setItem(12, new ItemStack(Material.GOLD_NUGGET, playerData.tokens));
     }
 
-    private static final int[] EMPTY_SPOTS = { 1, 2, 4, 6, 7, 9, 17, 18, 26, 27, 35, 36, 44, 46, 47, 48, 49, 50, 51, 52 };
+    private static final int[] EMPTY_SPOTS = { 0, 1, 2, 4, 6, 7, 8, 9, 17, 18, 26, 27, 35, 36, 44, 46, 47, 48, 49, 50, 51, 52 };
     public static void displayShop(Player player, boolean wands, int page) {
         System.out.println(wands);
 
@@ -186,6 +193,8 @@ public class GuiEvents implements Listener {
         for (int i : EMPTY_SPOTS) {
             inv.setItem(i, new ItemStack(Material.BLACK_STAINED_GLASS_PANE));
         }
+
+        inv.addItem(new ItemStack(Material.STICK), new ItemStack(Material.DIRT));
 
         if (wands) {
             inv.setItem(45, new ItemStack(Material.BLACK_STAINED_GLASS_PANE));

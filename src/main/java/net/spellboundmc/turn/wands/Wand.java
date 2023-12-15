@@ -1,14 +1,14 @@
-package net.spellboundmc.wands;
+package net.spellboundmc.turn.wands;
 
 import me.marcpg1905.util.Formatter;
-import net.spellboundmc.Turn;
+import net.spellboundmc.turn.Turn;
 import net.spellboundmc.other.Translation;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import static net.spellboundmc.wands.Ability.*;
+import static net.spellboundmc.turn.wands.Ability.*;
 import static org.bukkit.Material.*;
 
 public enum Wand implements Turn {
