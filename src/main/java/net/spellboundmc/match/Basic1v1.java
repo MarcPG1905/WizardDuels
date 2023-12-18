@@ -4,7 +4,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.title.Title;
 import net.spellboundmc.PlayerData;
 import net.spellboundmc.WizardDuels;
-import net.spellboundmc.other.GuiEvents;
+import net.spellboundmc.other.GuiManager;
 import net.spellboundmc.other.InformationManager;
 import net.spellboundmc.other.Translation;
 import net.spellboundmc.turn.TurnData;
@@ -21,7 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-import static me.marcpg1905.color.McFormat.*;
+import static com.marcpg.color.McFormat.*;
 
 /**
  * Duos2v2 is where two players compete with each other.
@@ -34,7 +34,7 @@ public class Basic1v1 implements Match {
     public final PlayerData playerData2;
     public final MatchTimer timer;
     public String mapSize = "ERROR";
-    public Player ICE_STORM, FIRE_RING, ICY_FEET, OPPONENTS_NO_MOVEMENT, POISON_SKELETONS;
+    public Player ICE_STORM, FIRE_RING, ICY_FEET, OPPONENTS_NO_MOVEMENT, POISON_SKELETONS, NO_GRAVITATION, STORM_WALL;
     public PrePhase prePhase = PrePhase.NONE;
 
     public Basic1v1(@NotNull Player player1, @NotNull Player player2) {
@@ -55,7 +55,7 @@ public class Basic1v1 implements Match {
         prePhase = PrePhase.values()[prePhase.ordinal() + 1];
 
         switch (prePhase) {
-            case TIME_OF_DAY -> GuiEvents.createInv(player2, 1, new int[]{ 0, 4, 8 }, "Choose the time of the day!",
+            case TIME_OF_DAY -> GuiManager.createInv(player2, 1, new int[]{ 0, 4, 8 }, "Choose the time of the day!",
                     item(Material.PINK_WOOL, Component.text("Morning")),
                     item(Material.LIGHT_BLUE_WOOL, Component.text("Noon")),
                     item(Material.CYAN_WOOL, Component.text("Afternoon")),
@@ -63,20 +63,20 @@ public class Basic1v1 implements Match {
                     item(Material.BLUE_WOOL, Component.text("Night")),
                     item(Material.BLACK_WOOL, Component.text("Midnight"))
             );
-            case MAP_SIZE -> GuiEvents.createInv(player1, 1, new int[]{ 0, 1, 7, 8 }, "Choose the map size!",
+            case MAP_SIZE -> GuiManager.createInv(player1, 1, new int[]{ 0, 1, 7, 8 }, "Choose the map size!",
                     item(Material.CYAN_WOOL, Component.text("Mini (8x8)")),
                     item(Material.LIME_WOOL, Component.text("Small (16x16)")),
                     item(Material.YELLOW_WOOL, Component.text("Normal (32x32)")),
                     item(Material.ORANGE_WOOL, Component.text("Big (64x64)")),
                     item(Material.RED_WOOL, Component.text("Huge (128x128)"))
             );
-            case TOKEN_AMOUNT -> GuiEvents.createInv(player2, 1, new int[]{ 0, 1, 4, 7, 8 }, "Choose the token amount!",
+            case TOKEN_AMOUNT -> GuiManager.createInv(player2, 1, new int[]{ 0, 1, 4, 7, 8 }, "Choose the token amount!",
                     item(Material.CYAN_WOOL, Component.text("Poor (15 Tokens)")),
                     item(Material.LIME_WOOL, Component.text("Low (25 Tokens)")),
                     item(Material.YELLOW_WOOL, Component.text("Normal (35 Tokens)")),
                     item(Material.ORANGE_WOOL, Component.text("High (50 Tokens)"))
             );
-            case WEATHER -> GuiEvents.createInv(player1, 1, new int[]{ 0, 1, 3, 5, 7, 8 }, "Choose the weather!",
+            case WEATHER -> GuiManager.createInv(player1, 1, new int[]{ 0, 1, 3, 5, 7, 8 }, "Choose the weather!",
                     item(Material.BLUE_WOOL, Component.text("Rain")),
                     item(Material.LIGHT_BLUE_WOOL, Component.text("Clear")),
                     item(Material.GRAY_WOOL, Component.text("Thunder"))

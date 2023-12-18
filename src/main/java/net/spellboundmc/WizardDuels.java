@@ -3,7 +3,7 @@ package net.spellboundmc;
 import net.spellboundmc.match.GiveUpCommand;
 import net.spellboundmc.match.Match;
 import net.spellboundmc.match.StartCommand;
-import net.spellboundmc.other.GuiEvents;
+import net.spellboundmc.other.GuiManager;
 import net.spellboundmc.other.Translation;
 import net.spellboundmc.turn.spells.SpellUseEvent;
 import net.spellboundmc.turn.wands.WandUseEvent;
@@ -30,7 +30,7 @@ public final class WizardDuels extends JavaPlugin {
         Objects.requireNonNull(getCommand("config-wd")).setExecutor(new Config());
         getServer().getPluginManager().registerEvents(new WandUseEvent(), this);
         getServer().getPluginManager().registerEvents(new SpellUseEvent(), this);
-        getServer().getPluginManager().registerEvents(new GuiEvents(), this);
+        getServer().getPluginManager().registerEvents(new GuiManager(), this);
 
         saveDefaultConfig();
         Config.init(getConfig());

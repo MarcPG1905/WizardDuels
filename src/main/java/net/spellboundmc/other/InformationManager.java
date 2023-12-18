@@ -1,6 +1,6 @@
 package net.spellboundmc.other;
 
-import me.marcpg1905.data.time.Time;
+import com.marcpg.data.time.Time;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import net.spellboundmc.PlayerData;
@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-import static me.marcpg1905.color.McFormat.*;
+import static com.marcpg.color.McFormat.*;
 
 public class InformationManager {
     private static final ScoreboardManager manager = Bukkit.getScoreboardManager();

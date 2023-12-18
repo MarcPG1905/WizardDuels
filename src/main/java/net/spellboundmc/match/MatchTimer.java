@@ -1,7 +1,7 @@
 package net.spellboundmc.match;
 
-import me.marcpg1905.data.time.Time;
-import me.marcpg1905.data.time.Timer;
+import com.marcpg.data.time.Time;
+import com.marcpg.data.time.Timer;
 import net.spellboundmc.WizardDuels;
 import org.bukkit.Bukkit;
 import org.bukkit.scheduler.BukkitTask;

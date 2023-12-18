@@ -1,6 +1,6 @@
 package net.spellboundmc.turn.wands;
 
-import me.marcpg1905.util.Formatter;
+import com.marcpg.text.Formatter;
 import net.spellboundmc.turn.Turn;
 import net.spellboundmc.other.Translation;
 import org.bukkit.entity.Player;

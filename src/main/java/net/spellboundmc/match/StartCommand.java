@@ -1,6 +1,6 @@
 package net.spellboundmc.match;
 
-import me.marcpg1905.text.Completer;
+import com.marcpg.text.Completer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import net.spellboundmc.Config;

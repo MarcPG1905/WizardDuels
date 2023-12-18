@@ -1,6 +1,6 @@
 package net.spellboundmc.turn.spells;
 
-import me.marcpg1905.util.Formatter;
+import com.marcpg.text.Formatter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import net.spellboundmc.turn.Turn;

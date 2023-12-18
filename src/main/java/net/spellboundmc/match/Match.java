@@ -5,7 +5,7 @@ public interface Match {
         NONE,
         TIME_OF_DAY,
         MAP_SIZE,
-        TOKEN_AMOUNT, // tf are tokens
+        TOKEN_AMOUNT,
         WEATHER,
         SHOP
     }

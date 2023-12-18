@@ -1,8 +1,8 @@
 package net.spellboundmc.turn.wands;
 
 import com.destroystokyo.paper.ParticleBuilder;
-import me.marcpg1905.color.McFormat;
-import me.marcpg1905.util.Randomizer;
+import com.marcpg.color.McFormat;
+import com.marcpg.util.Randomizer;
 import net.kyori.adventure.sound.SoundStop;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.title.Title;

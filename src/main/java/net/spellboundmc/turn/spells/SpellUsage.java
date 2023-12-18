@@ -1,6 +1,6 @@
 package net.spellboundmc.turn.spells;
 
-import me.marcpg1905.color.McFormat;
+import com.marcpg.color.McFormat;
 import net.kyori.adventure.text.Component;
 import net.spellboundmc.PlayerData;
 import net.spellboundmc.WizardDuels;

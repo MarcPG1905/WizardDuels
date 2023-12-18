@@ -1,6 +1,6 @@
 package net.spellboundmc.structures_deprecated;
 
-import me.marcpg1905.text.Completer;
+import com.marcpg.text.Completer;
 import net.kyori.adventure.text.Component;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -13,7 +13,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-import static me.marcpg1905.color.McFormat.*;
+import static com.marcpg.color.McFormat.*;
 
 @Deprecated
 public class StructureCommand implements CommandExecutor, TabCompleter {

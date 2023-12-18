@@ -2,6 +2,7 @@ package net.spellboundmc.other;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.spellboundmc.PlayerData;
 import net.spellboundmc.WizardDuels;
@@ -26,7 +27,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
-public class GuiEvents implements Listener {
+public class GuiManager implements Listener {
     public static final ItemStack INVISIBLE_FILLER = new ItemStack(Material.LIGHT_GRAY_STAINED_GLASS_PANE);
     public static final ItemStack BLACK_FILLER = new ItemStack(Material.BLACK_STAINED_GLASS_PANE);
     static {
@@ -186,15 +187,27 @@ public class GuiEvents implements Listener {
     }
 
     private static final int[] EMPTY_SPOTS = { 0, 1, 2, 4, 6, 7, 8, 9, 17, 18, 26, 27, 35, 36, 44, 46, 47, 48, 49, 50, 51, 52 };
-    public static void displayShop(Player player, boolean wands, int page) {
-        System.out.println(wands);
+    private static final ItemStack WANDS_ITEM = new ItemStack(Material.STICK);
+    private static final ItemStack SPELLS_ITEM = new ItemStack(Material.DIRT);
 
+    static {
+        WANDS_ITEM.editMeta(meta -> {
+            meta.setCustomModelData(1);
+            meta.displayName(Component.text("Wands").decorate(TextDecoration.BOLD).decoration(TextDecoration.ITALIC, false));
+        });
+        SPELLS_ITEM.editMeta(meta -> {
+            meta.setCustomModelData(1);
+            meta.displayName(Component.text("Spells").decorate(TextDecoration.BOLD).decoration(TextDecoration.ITALIC, false));
+        });
+    }
+
+    public static void displayShop(Player player, boolean wands, int page) {
         Inventory inv = Bukkit.createInventory(player, 54, Component.text("Shop - " + (wands ? "Wands" : "Spells - Page " + page)));
         for (int i : EMPTY_SPOTS) {
             inv.setItem(i, new ItemStack(Material.BLACK_STAINED_GLASS_PANE));
         }
 
-        inv.addItem(new ItemStack(Material.STICK), new ItemStack(Material.DIRT));
+        inv.addItem(WANDS_ITEM, SPELLS_ITEM);
 
         if (wands) {
             inv.setItem(45, new ItemStack(Material.BLACK_STAINED_GLASS_PANE));

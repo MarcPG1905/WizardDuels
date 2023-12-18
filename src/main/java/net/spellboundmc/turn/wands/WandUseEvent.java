@@ -1,8 +1,8 @@
 package net.spellboundmc.turn.wands;
 
+import com.marcpg.color.McFormat;
+import com.marcpg.text.Formatter;
 import io.papermc.paper.event.entity.EntityMoveEvent;
-import me.marcpg1905.color.McFormat;
-import me.marcpg1905.util.Formatter;
 import net.kyori.adventure.text.Component;
 import net.spellboundmc.PlayerData;
 import net.spellboundmc.WizardDuels;
