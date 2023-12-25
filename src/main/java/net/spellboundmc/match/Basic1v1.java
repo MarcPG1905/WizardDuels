@@ -85,6 +85,9 @@ public class Basic1v1 implements Match {
     }
 
     public void startMain() {
+        player1.closeInventory(InventoryCloseEvent.Reason.PLUGIN);
+        player2.closeInventory(InventoryCloseEvent.Reason.PLUGIN);
+
         player1.addPotionEffect(new PotionEffect(PotionEffectType.HEALTH_BOOST, -1, 3, true, false));
         player2.addPotionEffect(new PotionEffect(PotionEffectType.HEALTH_BOOST, -1, 3, true, false));
         player1.addPotionEffect(new PotionEffect(PotionEffectType.SATURATION, -1, 0, true, false));

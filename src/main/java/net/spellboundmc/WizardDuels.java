@@ -26,7 +26,7 @@ public final class WizardDuels extends JavaPlugin {
     @Override
     public void onEnable() {
         Objects.requireNonNull(getCommand("start")).setExecutor(new StartCommand());
-        Objects.requireNonNull(getCommand("giveup")).setExecutor(new GiveUpCommand());
+        Objects.requireNonNull(getCommand("give-up")).setExecutor(new GiveUpCommand());
         Objects.requireNonNull(getCommand("config-wd")).setExecutor(new Config());
         getServer().getPluginManager().registerEvents(new WandUseEvent(), this);
         getServer().getPluginManager().registerEvents(new SpellUseEvent(), this);

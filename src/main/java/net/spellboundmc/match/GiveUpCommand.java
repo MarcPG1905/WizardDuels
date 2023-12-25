@@ -23,7 +23,7 @@ public class GiveUpCommand implements CommandExecutor {
 
         if (WizardDuels.currentMatch instanceof Basic1v1 match) {
             match.lose(player);
-            player.getWorld().getPlayers().forEach(p -> p.sendMessage(Component.text(Translation.get(p.locale(), "match.giveup", player.getName()), TextColor.color(255, 85, 255))));
+            player.getWorld().getPlayers().forEach(p -> p.sendMessage(Component.text(Translation.get(p.locale(), "match.give-up", player.getName()), TextColor.color(255, 85, 255))));
         }
 
         return true;

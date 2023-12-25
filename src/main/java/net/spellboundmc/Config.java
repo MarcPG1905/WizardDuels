@@ -15,7 +15,6 @@ import java.util.List;
 import java.util.Objects;
 
 public class Config implements CommandExecutor, TabExecutor {
-    public static int GAME_ID;
     public static boolean ALLOW_JOIN;
     public static boolean EXPERIMENTAL;
     public static boolean COMPETITIVE;
@@ -23,7 +22,6 @@ public class Config implements CommandExecutor, TabExecutor {
     public static List<String> DISALLOWED_TYPES;
 
     public static void init(@NotNull FileConfiguration config) {
-        GAME_ID = config.getInt("game-id");
         ALLOW_JOIN = config.getBoolean("allow-join");
         EXPERIMENTAL = config.getBoolean("experimental");
         COMPETITIVE = config.getBoolean("competitive");

@@ -210,7 +210,7 @@ public class WandUsage {
                 player.teleport(newLoc);
                 player.playSound(loc, Sound.ENTITY_ENDERMAN_TELEPORT, 1.0f, 1.0f);
             }
-            case ENDSTONE_WALL -> {
+            case END_STONE_WALL -> {
                 double xDirection = loc.getDirection().getX();
                 double zDirection = loc.getDirection().getZ();
                 boolean isXAxis = Math.abs(xDirection) < Math.abs(zDirection);
@@ -268,18 +268,7 @@ public class WandUsage {
                 }, b(playerData, 120, 240));
             }
             case DRAGON -> {
-                // EnderDragon dragon = world.spawn(player.getLocation(), EnderDragon.class);
-                // dragon.setTarget(opponentData.player);
-                //
-                // new BukkitRunnable() {
-                //     @Override
-                //     public void run() {
-                //         if (dragon.getLocation().distance(opponentData.player.getLocation()) < 2.0) {
-                //             dragon.remove();
-                //             cancel();
-                //         }
-                //     }
-                // }.runTaskTimer(WizardDuels.getPlugin(WizardDuels.class), 0, 2);
+                // TODO: Make dragon fly to opponent and then despawn.
             }
             case CRYSTAL_SHIELD -> {
                 Location randomLocation = getRandomLocation(loc, b(playerData, 10, 15));
@@ -375,21 +364,7 @@ public class WandUsage {
                 player.setVelocity(new Vector(direction.getX(), 0.6, direction.getZ()).multiply(b(playerData, 2, 3)));
             }
             case STORM_SHIELD -> {
-                        /*
-                        for (int i = 0; i < 100; i++) {
-                            double angle = 2 * Math.PI * i / 100;
-                            double xOffset = 2 * Math.cos(angle);
-                            double zOffset = 2 * Math.sin(angle);
-
-                            Location particleLocation = new Location(player.getWorld(), loc.getX() + xOffset, loc.getY() + 1, loc.getZ() + zOffset);
-
-                            player.spawnParticle(Particle.REDSTONE, particleLocation, 0, 0, 0, 0, 1);
-                        }
-
-                        STORM_WALL = player;
-
-                        Bukkit.getScheduler().runTaskLater(WizardDuels.getPlugin(WizardDuels.class), () -> STORM_WALL = null, 200);
-                        */
+                // TODO: Make a shield of particles around the player and projectiles lose velocity once entering.
             }
             case TORNADO -> {
                 Horse horse = world.spawn(loc, Horse.class);

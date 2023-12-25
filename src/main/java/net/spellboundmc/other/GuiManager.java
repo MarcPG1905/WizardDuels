@@ -2,7 +2,6 @@ package net.spellboundmc.other;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
-import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.spellboundmc.PlayerData;
 import net.spellboundmc.WizardDuels;
@@ -99,8 +98,6 @@ public class GuiManager implements Listener {
                             match.player2.getInventory().setItem(14, new ItemStack(Material.IRON_NUGGET, secsLeft));
                             secsLeft--;
                             if (secsLeft <= 0) {
-                                match.player1.closeInventory(InventoryCloseEvent.Reason.PLUGIN);
-                                match.player2.closeInventory(InventoryCloseEvent.Reason.PLUGIN);
                                 match.startMain();
                                 cancel();
                             }
@@ -119,6 +116,7 @@ public class GuiManager implements Listener {
 
             Player player = (Player) event.getWhoClicked();
             PlayerData playerData = (match.player1 == player ? match.playerData1 : match.playerData2);
+            PlayerData opponentData = (match.player1 == player ? match.playerData2 : match.playerData1);
 
             if (title.contains("wands")) {
                 if (item == Material.DIRT) {
@@ -151,6 +149,7 @@ public class GuiManager implements Listener {
 
                             if (player.getInventory().getItem(7) != null || !Objects.requireNonNull(player.getInventory().getItem(7)).isEmpty()) {
                                 playerData.shopDone = true;
+                                if (opponentData.shopDone) match.startMain();
                             }
                         } else {
                             player.playSound(player, Sound.ENTITY_VILLAGER_NO, 1.0f, 1.0f);

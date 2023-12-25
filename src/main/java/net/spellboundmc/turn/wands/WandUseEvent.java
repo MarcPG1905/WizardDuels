@@ -72,7 +72,7 @@ public class WandUseEvent implements Listener {
                 switch (use) {
                     case LMB -> WandUsage.wandUse(Ability.ENDER_BALL, player);
                     case RMB -> WandUsage.wandUse(Ability.ENDERMAN_TELEPORT, player);
-                    case SLMB -> WandUsage.wandUse(Ability.ENDSTONE_WALL, player);
+                    case SLMB -> WandUsage.wandUse(Ability.END_STONE_WALL, player);
                     case SRMB -> WandUsage.wandUse(Ability.POSITION_SWAP, player);
                 }
             }

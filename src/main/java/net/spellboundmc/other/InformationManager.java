@@ -16,7 +16,6 @@ import org.bukkit.scoreboard.*;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Math;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -26,6 +25,7 @@ public class InformationManager {
     private static final ScoreboardManager manager = Bukkit.getScoreboardManager();
 
     public static BukkitTask basicScoreboard;
+
     public static void startBasic(Basic1v1 match) {
         basicScoreboard = Bukkit.getScheduler().runTaskTimer(WizardDuels.PLUGIN, () -> {
             updateBasic(match, true);
@@ -40,28 +40,31 @@ public class InformationManager {
         Player player = (team1 ? match.player1 : match.player2);
         Locale l = player.locale();
 
+        PlayerData opponentData = (team1 ? match.playerData2 : match.playerData1);
+
         Scoreboard scoreboard = manager.getNewScoreboard();
         Objective objective = scoreboard.registerNewObjective("basic1v1", Criteria.DUMMY, Component.text(RED + "Wizard " + BLUE + "Duels " + RESET + "1v1"));
         objective.setDisplaySlot(DisplaySlot.SIDEBAR);
 
-        List<Score> scores = new ArrayList<>();
+        List<Score> scores = List.of(
+                objective.getScore(GREEN + Translation.get(l, "scoreboard.hp.team") + (int) player.getHealth()),
+                objective.getScore(GREEN + Translation.get(l, "scoreboard.hp.enemy") + (int) opponentData.player.getHealth()),
+                objective.getScore(" "),
+                objective.getScore(GOLD + Translation.get(l, "scoreboard.match_rank") + "1.0"),
+                objective.getScore("  "),
+                objective.getScore(DARK_RED + Translation.get(l, "scoreboard.enemy_wand") + Translation.get(l, opponentData.selectedWand.translationKey())),
+                objective.getScore("   "),
+                objective.getScore(BLUE + Translation.get(l, "scoreboard.time") + match.timer.getLeft().getOneUnitFormatted()),
+                objective.getScore("    "),
+                objective.getScore(GRAY + Translation.get(l, "scoreboard.map") + "PLACEHOLDER"),
+                objective.getScore(GRAY + Translation.get(l, "scoreboard.map_size") + match.mapSize)
+        );
 
-        scores.add(objective.getScore(GREEN + Translation.get(l, "scoreboard.hp.team") + (int) (team1 ? match.player1 : match.player2).getHealth()));
-        scores.add(objective.getScore(GREEN + Translation.get(l, "scoreboard.hp.enemy") + (int) (team1 ? match.player2 : match.player1).getHealth()));
-        scores.add(objective.getScore(" "));
-        scores.add(objective.getScore(GOLD + Translation.get(l, "scoreboard.match_rank") + "1.0"));
-        scores.add(objective.getScore("  "));
-        scores.add(objective.getScore(BLUE + Translation.get(l, "scoreboard.time") + match.timer.getLeft().getOneUnitFormatted()));
-        scores.add(objective.getScore("   "));
-        scores.add(objective.getScore(GRAY + Translation.get(l, "scoreboard.map") + "PLACEHOLDER"));
-        scores.add(objective.getScore(GRAY + Translation.get(l, "scoreboard.map_size") + match.mapSize));
-
-        int scoreValue = scores.size() - 1;
-        for (int i = scoreValue; i >= 0; i--) {
-            scores.get(i).setScore(scoreValue - i);
+        for (int i = scores.size() - 1; i >= 0; i--) {
+            scores.get(i).setScore(scores.size() - 1 - i);
         }
 
-        (team1 ? match.player1 : match.player2).setScoreboard(scoreboard);
+        player.setScoreboard(scoreboard);
     }
 
     public static void stopBasic(@NotNull Player player1, @NotNull Player player2) {

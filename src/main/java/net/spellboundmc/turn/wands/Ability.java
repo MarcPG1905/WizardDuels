@@ -19,7 +19,7 @@ public enum Ability implements Turn {
     ICE_STORM(30, Wand.ICE),
     ENDER_BALL(5, Wand.ENDER),
     ENDERMAN_TELEPORT(25, Wand.ENDER),
-    ENDSTONE_WALL(25, Wand.ENDER),
+    END_STONE_WALL(25, Wand.ENDER),
     POSITION_SWAP(60, Wand.ENDER),
     DRAGONS_BREATH(20, Wand.DRAGON),
     DRAGONS_WINGS(30, Wand.DRAGON),

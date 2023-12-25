@@ -1,7 +1,3 @@
-# Should usually match the number given in the velocity config
-# Not implemented yet!
-game-id: 0
-
 # If normal players without special permissions are allowed to join
 # Not implemented yet!
 allow-join: true
