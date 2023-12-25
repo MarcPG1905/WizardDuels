@@ -12,17 +12,13 @@ apply plugin: 'com.github.johnrengelman.shadow'
 apply plugin: 'java'
 
 group = 'com.wizardduels'
-version = '0.0.2-ALPHA-1.20.4'
+version = '0.0.3-BETA'
 
 repositories {
     mavenCentral()
     maven {
         name = 'papermc-repo'
         url = 'https://repo.papermc.io/repository/maven-public/'
-    }
-    maven {
-        name = 'sonatype'
-        url = 'https://oss.sonatype.org/content/groups/public/'
     }
     mavenLocal()
 }
@@ -33,15 +29,8 @@ dependencies {
     implementation 'com.opencsv:opencsv:5.9' // OpenCSV is a library for parsing CSV files
 }
 
-def targetJavaVersion = 17
 java {
     toolchain.languageVersion.set(JavaLanguageVersion.of(17))
-}
-
-tasks.withType(JavaCompile).configureEach {
-    if (targetJavaVersion >= 10 || JavaVersion.current().isJava10Compatible()) {
-        options.release = targetJavaVersion
-    }
 }
 
 processResources {
