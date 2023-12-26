@@ -55,11 +55,11 @@ public class GuiManager implements Listener {
                     default -> throw new IllegalStateException("Unexpected value: " + event.getSlot());
                 });
                 case MAP_SIZE -> match.mapSize = switch (event.getSlot()) {
-                    case 2 -> "Mini (8x8)";
-                    case 3 -> "Small (16x16)";
-                    case 4 -> "Normal (32x32)";
-                    case 5 -> "Big (64x64)";
-                    case 6 -> "Huge (128x128)";
+                    case 2 -> Basic1v1.MapSize.MINI;
+                    case 3 -> Basic1v1.MapSize.SMALL;
+                    case 4 -> Basic1v1.MapSize.NORMAL;
+                    case 5 -> Basic1v1.MapSize.BIG;
+                    case 6 -> Basic1v1.MapSize.HUGE;
                     default -> throw new IllegalStateException("Unexpected value: " + event.getSlot());
                 };
                 case TOKEN_AMOUNT -> {

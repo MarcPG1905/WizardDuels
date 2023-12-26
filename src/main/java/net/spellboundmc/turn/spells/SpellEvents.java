@@ -4,19 +4,24 @@ import com.destroystokyo.paper.event.player.PlayerLaunchProjectileEvent;
 import net.spellboundmc.PlayerData;
 import net.spellboundmc.WizardDuels;
 import net.spellboundmc.match.Basic1v1;
+import net.spellboundmc.turn.wands.WandUsage;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Fireball;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockFromToEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 import org.jetbrains.annotations.NotNull;
 
-public class SpellUseEvent implements Listener {
+public class SpellEvents implements Listener {
     @EventHandler
     public void onBlockPlace(@NotNull BlockPlaceEvent event) {
         if (WizardDuels.currentMatch == null) return;
@@ -26,7 +31,7 @@ public class SpellUseEvent implements Listener {
         Spell spell = Spell.getSpellPlaced(event.getBlock().getType());
         if (spell == null) return;
 
-        if (SpellUsage.spellUse(spell, event.getPlayer())) {
+        if (SpellUsage.spellUse(spell, event.getPlayer(), event.getBlock())) {
             Block block = event.getBlockPlaced();
             block.setType(block.getType());
         }
@@ -36,16 +41,41 @@ public class SpellUseEvent implements Listener {
     public void onBlockBreak(@NotNull BlockBreakEvent event) {
         if (WizardDuels.currentMatch == null) return;
 
-        if (event.getBlock().getType() == Material.DARK_PRISMARINE) {
-            World world = event.getPlayer().getWorld();
-            world.setThundering(false);
-            world.setStorm(false);
+        Basic1v1 basic1v1 = (Basic1v1) WizardDuels.currentMatch;
+        PlayerData playerData = (event.getPlayer() == basic1v1.player1 ? basic1v1.playerData1 : basic1v1.playerData2);
+        PlayerData opponentData = (event.getPlayer() == basic1v1.player1 ? basic1v1.playerData2 : basic1v1.playerData1);
 
-            Basic1v1 basic1v1 = (Basic1v1) WizardDuels.currentMatch;
-            (event.getPlayer() == basic1v1.player1 ? basic1v1.playerData1 : basic1v1.playerData2).thunderEffect = false;
-            (event.getPlayer() == basic1v1.player1 ? basic1v1.playerData2 : basic1v1.playerData1).thunderEffect = false;
+        if (event.getBlock().getType() == Material.DARK_PRISMARINE) {
+            playerData.thunderEffect = false;
+            opponentData.thunderEffect = false;
+            event.getPlayer().getWorld().setThundering(false);
+            event.getPlayer().getWorld().setStorm(false);
+        } else if (event.getBlock().getType() == Material.SPAWNER) {
+            playerData.constantSpawning = false;
         } else {
             event.setCancelled(true);
+        }
+    }
+
+    @EventHandler
+    public void onPlayerMove(PlayerMoveEvent event) {
+        if (WizardDuels.currentMatch == null) return;
+
+        Basic1v1 basic1v1 = (Basic1v1) WizardDuels.currentMatch;
+        PlayerData playerData = (event.getPlayer() == basic1v1.player1 ? basic1v1.playerData1 : basic1v1.playerData2);
+        if (playerData.cobwebCenter != null) {
+            if (event.getFrom().getBlock().getType() == Material.COBWEB && event.getTo().getBlock().getType() != Material.COBWEB) {
+                if (playerData.cobwebCenter.distance(event.getFrom()) < playerData.cobwebCenter.distance(event.getTo())) {
+                    WandUsage.generate3dBall(playerData.player.getLocation(), 3.5, 64, location -> {
+                        if (location.getBlock().getType() == Material.COBWEB) {
+                            location.getBlock().setType(Material.AIR);
+                        }
+                    });
+                    playerData.cobwebCenter = null;
+                    event.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 600, 0));
+                    (event.getPlayer() == basic1v1.player1 ? basic1v1.playerData2 : basic1v1.playerData1).spellCooldowns.put(Spell.getSpellPlaced(Material.COBWEB), 50);
+                }
+            }
         }
     }
 

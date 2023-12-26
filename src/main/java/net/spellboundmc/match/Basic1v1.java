@@ -27,13 +27,27 @@ import static com.marcpg.color.McFormat.*;
  * Duos2v2 is where two players compete with each other.
  */
 public class Basic1v1 implements Match {
+    public enum MapSize {
+        MINI(8), SMALL(16), NORMAL(32), BIG(64), HUGE(128);
+
+        public final int size;
+
+        MapSize(int size) {
+            this.size = size;
+        }
+
+        public @NotNull String translate(Locale locale) {
+            return Translation.get(locale, "scoreboard.map_size." + name().toLowerCase()) + " ("+size+"x"+size+")";
+        }
+    }
+
     public final List<TurnData> history = new ArrayList<>();
     public final Player player1;
     public final Player player2;
     public final PlayerData playerData1;
     public final PlayerData playerData2;
     public final MatchTimer timer;
-    public String mapSize = "ERROR";
+    public MapSize mapSize = null;
     public Player ICE_STORM, FIRE_RING, ICY_FEET, OPPONENTS_NO_MOVEMENT, POISON_SKELETONS, NO_GRAVITATION, STORM_WALL;
     public PrePhase prePhase = PrePhase.NONE;
 

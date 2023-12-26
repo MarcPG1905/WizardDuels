@@ -1,6 +1,7 @@
 package net.spellboundmc.turn.spells;
 
 import com.marcpg.color.McFormat;
+import com.marcpg.util.Randomizer;
 import net.kyori.adventure.text.Component;
 import net.spellboundmc.PlayerData;
 import net.spellboundmc.WizardDuels;
@@ -8,6 +9,7 @@ import net.spellboundmc.match.Basic1v1;
 import net.spellboundmc.turn.TurnData;
 import net.spellboundmc.turn.wands.WandUsage;
 import org.bukkit.*;
+import org.bukkit.block.Block;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.*;
 import org.bukkit.inventory.ItemStack;
@@ -18,7 +20,7 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 
 public class SpellUsage {
-    public static boolean spellUse(Spell spell, @NotNull Player player) {
+    public static boolean spellUse(Spell spell, @NotNull Player player, Block block) {
         Location loc = player.getLocation();
         World world = player.getWorld();
 
@@ -137,6 +139,59 @@ public class SpellUsage {
                     }
                 }
                 if (playerData.waterBucketLevel < 3) playerData.waterBucketLevel++;
+            }
+            case PISTON -> {
+                int blocks = basic1v1.mapSize.ordinal() * 2 + 4;
+                for (Player p : WizardDuels.WORLD.getPlayers()) {
+                    if (p != player) {
+                        p.playSound(p, Sound.BLOCK_PISTON_EXTEND, 2.0f, 1.0f);
+                        p.setVelocity(p.getLocation().getDirection().normalize().multiply(blocks));
+                    }
+                }
+            }
+            case CHAIN -> {
+                // Can't do this rn, because vlad imagined turns, which don't even exist
+            }
+            case COBWEB -> {
+                WandUsage.generate3dBall(opponentData.player.getLocation(), 3.5, 64, location -> {
+                    if (location.getBlock().getType().isAir()) {
+                        location.getBlock().setType(Material.COBWEB);
+                    }
+                });
+                opponentData.cobwebCenter = opponentData.player.getLocation();
+            }
+            case SPAWNER -> {
+                playerData.constantSpawning = true;
+                new BukkitRunnable() {
+                    int periods = 0;
+                    @Override
+                    public void run() {
+                        if (!playerData.constantSpawning) cancel();
+
+                        Class<? extends Entity> entityClass;
+                        do entityClass = Randomizer.fromArray(EntityType.values()).getEntityClass();
+                        while (entityClass == null || !Monster.class.isAssignableFrom(entityClass) || entityClass == Wither.class || entityClass == EnderDragon.class);
+
+                        Monster monster = (Monster) player.getWorld().spawn(WandUsage.getRandomLocation(player.getLocation(), 5), entityClass);
+                        monster.setTarget(opponentData.player);
+
+                        if (periods++ == 3) {
+                            playerData.constantSpawning = false;
+                            cancel();
+                        }
+                    }
+                }.runTaskTimer(WizardDuels.PLUGIN, 0, 200);
+            }
+            case OAK_PLANKS -> {
+                boolean isXAxis = Math.abs(loc.getDirection().getX()) < Math.abs(loc.getDirection().getZ());
+                Location startLocation = loc.clone().add(loc.getDirection().multiply(2));
+                startLocation.setY(player.getY());
+
+                for (int x = -1; x < 2; x++) {
+                    for (int y = 0; y < 3; y++) {
+                        world.getBlockAt(startLocation.clone().add(x * (isXAxis ? 1 : 0), 0, x * (isXAxis ? 0 : 1)).add(0, y, 0)).setType(Material.OAK_PLANKS);
+                    }
+                }
             }
         }
         basic1v1.history.add(new TurnData(spell, true, playerData, LocalDateTime.now()));

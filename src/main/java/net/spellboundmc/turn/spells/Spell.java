@@ -23,7 +23,12 @@ public enum Spell implements Turn {
     FLETCHING_TABLE(true, 15, Material.FLETCHING_TABLE, Material.FLETCHING_TABLE),
     OBSIDIAN(false, 0, Material.OBSIDIAN, null),
     LAVA(true, 10, Material.LAVA, Material.LAVA_BUCKET),
-    WATER(true, 10, Material.WATER, Material.WATER_BUCKET);
+    WATER(true, 10, Material.WATER, Material.WATER_BUCKET),
+    PISTON(true, 8, Material.PISTON, Material.PISTON),
+    CHAIN(true, 15, Material.CHAIN, Material.CHAIN),
+    COBWEB(true, 12, Material.COBWEB, Material.COBWEB),
+    SPAWNER(true, 12, Material.SPAWNER, Material.SPAWNER),
+    OAK_PLANKS(true, 8, Material.OAK_PLANKS, Material.OAK_PLANKS);
 
     public final boolean shop;
     public final int price;

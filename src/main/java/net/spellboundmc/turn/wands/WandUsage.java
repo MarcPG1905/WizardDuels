@@ -32,8 +32,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.Consumer;
 
-import static org.bukkit.Material.AIR;
-import static org.bukkit.Material.END_STONE;
+import static org.bukkit.Material.*;
 import static org.bukkit.block.BlockFace.*;
 import static org.bukkit.entity.EntityType.*;
 
@@ -211,18 +210,14 @@ public class WandUsage {
                 player.playSound(loc, Sound.ENTITY_ENDERMAN_TELEPORT, 1.0f, 1.0f);
             }
             case END_STONE_WALL -> {
-                double xDirection = loc.getDirection().getX();
-                double zDirection = loc.getDirection().getZ();
-                boolean isXAxis = Math.abs(xDirection) < Math.abs(zDirection);
+                boolean isXAxis = Math.abs(loc.getDirection().getX()) < Math.abs(loc.getDirection().getZ());
 
                 Location startLocation = loc.clone().add(loc.getDirection().multiply(5));
                 startLocation.setY(player.getY());
 
                 for (int x = -2; x < 3; x++) {
                     for (int y = 0; y < 5; y++) {
-                        Location blockLocation = startLocation.clone().add(x * (isXAxis ? 1 : 0), 0, x * (isXAxis ? 0 : 1)).add(0, y, 0);
-                        Block block = world.getBlockAt(blockLocation);
-                        block.setType(END_STONE);
+                        world.getBlockAt(startLocation.clone().add(x * (isXAxis ? 1 : 0), 0, x * (isXAxis ? 0 : 1)).add(0, y, 0)).setType(END_STONE);
                     }
                 }
             }
@@ -406,7 +401,7 @@ public class WandUsage {
                 private int counter;
                 @Override
                 public void run() {
-                    generate3dBall(player.getLocation(), 8.0, 30, new ParticleBuilder(Particle.REDSTONE).color(255, 255, 0));
+                    generate3dBall(player.getLocation(), 8.0, 30, location -> new ParticleBuilder(Particle.REDSTONE).color(255, 255, 0).location(location).spawn());
 
                     for (Entity entity : player.getNearbyEntities(16, 16, 16)) {
                         entity.setVelocity(entity.getVelocity().multiply(0.5));
@@ -431,7 +426,7 @@ public class WandUsage {
                 private int counter;
                 @Override
                 public void run() {
-                    generate3dBall(player.getLocation(), 4.0, 30, new ParticleBuilder(Particle.REDSTONE).color(255, 255, 0));
+                    generate3dBall(player.getLocation(), 4.0, 30, location -> new ParticleBuilder(Particle.REDSTONE).color(255, 255, 0).location(location).spawn());
 
                     for (Entity entity : player.getNearbyEntities(8, 8, 8)) {
                         if (entity instanceof Projectile projectile) {
@@ -843,9 +838,8 @@ public class WandUsage {
             }
             case NECROMANCER -> {
                 Class<? extends Entity> entityClass;
-
                 do entityClass = Randomizer.fromArray(EntityType.values()).getEntityClass();
-                while (entityClass == null || !Monster.class.isAssignableFrom(entityClass));
+                while (entityClass == null || !Monster.class.isAssignableFrom(entityClass) || entityClass == Wither.class || entityClass == EnderDragon.class);
 
                 Monster monster = (Monster) world.spawn(getRandomLocation(loc, 4), entityClass);
                 monster.setTarget(opponentData.player);
@@ -972,7 +966,7 @@ public class WandUsage {
         }
     }
 
-    public static void generate3dBall(@NotNull Location center, double radius, int points, ParticleBuilder particle) {
+    public static void generate3dBall(@NotNull Location center, double radius, int points, Consumer<Location> forPoint) {
         double centerX = center.x();
         double centerY = center.y();
         double centerZ = center.z();
@@ -985,7 +979,7 @@ public class WandUsage {
                 double y = centerY + radius * Math.cos(phi);
                 double z = centerZ + radius * Math.sin(phi) * Math.sin(theta);
 
-                particle.location(center.getWorld(), x, y, z).spawn();
+                forPoint.accept(new Location(center.getWorld(), x, y, z));
             }
         }
     }

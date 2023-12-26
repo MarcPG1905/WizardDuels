@@ -29,7 +29,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
-public class WandUseEvent implements Listener {
+public class WandEvents implements Listener {
     @EventHandler
     public void onPlayerInteract(@NotNull PlayerInteractEvent event) {
         if (WizardDuels.currentMatch == null || !event.hasItem()) return;

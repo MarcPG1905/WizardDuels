@@ -5,8 +5,8 @@ import net.spellboundmc.match.Match;
 import net.spellboundmc.match.StartCommand;
 import net.spellboundmc.other.GuiManager;
 import net.spellboundmc.other.Translation;
-import net.spellboundmc.turn.spells.SpellUseEvent;
-import net.spellboundmc.turn.wands.WandUseEvent;
+import net.spellboundmc.turn.spells.SpellEvents;
+import net.spellboundmc.turn.wands.WandEvents;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.plugin.Plugin;
@@ -28,8 +28,8 @@ public final class WizardDuels extends JavaPlugin {
         Objects.requireNonNull(getCommand("start")).setExecutor(new StartCommand());
         Objects.requireNonNull(getCommand("give-up")).setExecutor(new GiveUpCommand());
         Objects.requireNonNull(getCommand("config-wd")).setExecutor(new Config());
-        getServer().getPluginManager().registerEvents(new WandUseEvent(), this);
-        getServer().getPluginManager().registerEvents(new SpellUseEvent(), this);
+        getServer().getPluginManager().registerEvents(new WandEvents(), this);
+        getServer().getPluginManager().registerEvents(new SpellEvents(), this);
         getServer().getPluginManager().registerEvents(new GuiManager(), this);
 
         saveDefaultConfig();

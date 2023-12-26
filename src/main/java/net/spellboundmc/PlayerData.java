@@ -24,8 +24,9 @@ public class PlayerData {
     public final LinkedList<Location> locationQueue = new LinkedList<>();
     public final HashMap<Ability, Integer> abilityCooldowns = new HashMap<>();
     public final List<Spell> spells = new ArrayList<>();
-    public boolean wandCrystalActive, spellCrystalActive, disabledWands, boostedAbilities, thunderEffect, spellLuck25;
+    public boolean wandCrystalActive, spellCrystalActive, disabledWands, boostedAbilities, thunderEffect, spellLuck25, constantSpawning;
     public int fireballsLeft, lavaBucketLevel = 1, waterBucketLevel = 1;
+    public Location cobwebCenter;
     public int tokens;
     public boolean shopDone;
     public Wand selectedWand;

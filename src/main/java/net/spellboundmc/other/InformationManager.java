@@ -57,7 +57,7 @@ public class InformationManager {
                 objective.getScore(BLUE + Translation.get(l, "scoreboard.time") + match.timer.getLeft().getOneUnitFormatted()),
                 objective.getScore("    "),
                 objective.getScore(GRAY + Translation.get(l, "scoreboard.map") + "PLACEHOLDER"),
-                objective.getScore(GRAY + Translation.get(l, "scoreboard.map_size") + match.mapSize)
+                objective.getScore(GRAY + Translation.get(l, "scoreboard.map_size") + match.mapSize.translate(l))
         );
 
         for (int i = scores.size() - 1; i >= 0; i--) {

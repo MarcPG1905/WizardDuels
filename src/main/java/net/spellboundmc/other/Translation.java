@@ -29,7 +29,10 @@ public class Translation {
         key = key.toLowerCase(Locale.ROOT).replace(" ", "");
 
         String en = EN_ENGLISH.get(key);
-        if (en == null) throw new IllegalArgumentException("String not found!");
+        if (en == null) {
+            WizardDuels.LOG.warning("Translation \"" + key + "\" was not found! Returning the key now.");
+            return key;
+        }
 
         if (!Config.LOCALIZATION) return en;
 
