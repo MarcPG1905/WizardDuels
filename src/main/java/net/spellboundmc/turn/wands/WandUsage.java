@@ -32,7 +32,8 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.Consumer;
 
-import static org.bukkit.Material.*;
+import static org.bukkit.Material.AIR;
+import static org.bukkit.Material.END_STONE;
 import static org.bukkit.block.BlockFace.*;
 import static org.bukkit.entity.EntityType.*;
 
