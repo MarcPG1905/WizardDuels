@@ -1,13 +1,13 @@
-package net.spellboundmc.match;
+package com.spellboundmc.wizardduels.match;
 
+import com.spellboundmc.wizardduels.PlayerData;
+import com.spellboundmc.wizardduels.other.GuiManager;
+import com.spellboundmc.wizardduels.turn.TurnData;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.title.Title;
-import net.spellboundmc.PlayerData;
-import net.spellboundmc.WizardDuels;
-import net.spellboundmc.other.GuiManager;
-import net.spellboundmc.other.InformationManager;
-import net.spellboundmc.other.Translation;
-import net.spellboundmc.turn.TurnData;
+import com.spellboundmc.wizardduels.WizardDuels;
+import com.spellboundmc.wizardduels.other.InformationManager;
+import com.spellboundmc.wizardduels.other.Translation;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;

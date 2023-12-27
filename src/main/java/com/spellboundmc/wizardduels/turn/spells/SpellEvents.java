@@ -1,16 +1,14 @@
-package net.spellboundmc.turn.spells;
+package com.spellboundmc.wizardduels.turn.spells;
 
 import com.destroystokyo.paper.event.player.PlayerLaunchProjectileEvent;
-import net.spellboundmc.PlayerData;
-import net.spellboundmc.WizardDuels;
-import net.spellboundmc.match.Basic1v1;
-import net.spellboundmc.turn.wands.WandUsage;
+import com.spellboundmc.wizardduels.PlayerData;
+import com.spellboundmc.wizardduels.WizardDuels;
+import com.spellboundmc.wizardduels.match.Basic1v1;
+import com.spellboundmc.wizardduels.turn.wands.WandUsage;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Fireball;
-import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;

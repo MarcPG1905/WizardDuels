@@ -1,6 +1,6 @@
-package net.spellboundmc.turn;
+package com.spellboundmc.wizardduels.turn;
 
-import net.spellboundmc.PlayerData;
+import com.spellboundmc.wizardduels.PlayerData;
 
 import java.time.LocalDateTime;
 

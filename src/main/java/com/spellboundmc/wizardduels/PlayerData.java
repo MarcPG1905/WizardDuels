@@ -1,8 +1,8 @@
-package net.spellboundmc;
+package com.spellboundmc.wizardduels;
 
-import net.spellboundmc.turn.spells.Spell;
-import net.spellboundmc.turn.wands.Ability;
-import net.spellboundmc.turn.wands.Wand;
+import com.spellboundmc.wizardduels.turn.wands.Wand;
+import com.spellboundmc.wizardduels.turn.spells.Spell;
+import com.spellboundmc.wizardduels.turn.wands.Ability;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 

@@ -1,8 +1,8 @@
-package net.spellboundmc.turn.wands;
+package com.spellboundmc.wizardduels.turn.wands;
 
 import com.marcpg.text.Formatter;
-import net.spellboundmc.turn.Turn;
-import net.spellboundmc.other.Translation;
+import com.spellboundmc.wizardduels.turn.Turn;
+import com.spellboundmc.wizardduels.other.Translation;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 

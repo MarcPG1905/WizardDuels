@@ -1,9 +1,9 @@
-package net.spellboundmc.match;
+package com.spellboundmc.wizardduels.match;
 
+import com.spellboundmc.wizardduels.WizardDuels;
+import com.spellboundmc.wizardduels.other.Translation;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
-import net.spellboundmc.WizardDuels;
-import net.spellboundmc.other.Translation;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;

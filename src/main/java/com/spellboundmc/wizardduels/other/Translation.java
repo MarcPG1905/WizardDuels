@@ -1,8 +1,8 @@
-package net.spellboundmc.other;
+package com.spellboundmc.wizardduels.other;
 
 import com.opencsv.CSVReader;
-import net.spellboundmc.Config;
-import net.spellboundmc.WizardDuels;
+import com.spellboundmc.wizardduels.Config;
+import com.spellboundmc.wizardduels.WizardDuels;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
@@ -10,19 +10,17 @@ import java.io.FileReader;
 import java.util.HashMap;
 import java.util.Locale;
 
-import static net.spellboundmc.WizardDuels.DATA_FOLDER;
-
 public class Translation {
     public static HashMap<String, String> EN_ENGLISH, DE_GERMAN, RU_RUSSIAN, UA_UKRAINIAN, LOL_LOLCAT, LA_LATIN, ES_SPAIN;
 
     public static void init() {
-        EN_ENGLISH = new HashMap<>(readCsvFile(new File(DATA_FOLDER, "en.csv")));
-        DE_GERMAN = new HashMap<>(readCsvFile(new File(DATA_FOLDER, "de.csv")));
-        RU_RUSSIAN = new HashMap<>(readCsvFile(new File(DATA_FOLDER, "ru.csv")));
-        UA_UKRAINIAN = new HashMap<>(readCsvFile(new File(DATA_FOLDER, "ua.csv")));
-        LOL_LOLCAT = new HashMap<>(readCsvFile(new File(DATA_FOLDER, "lol.csv")));
-        LA_LATIN = new HashMap<>(readCsvFile(new File(DATA_FOLDER, "la.csv")));
-        ES_SPAIN = new HashMap<>(readCsvFile(new File(DATA_FOLDER, "es.csv")));
+        EN_ENGLISH = new HashMap<>(readCsvFile(new File(WizardDuels.DATA_FOLDER, "en.csv")));
+        DE_GERMAN = new HashMap<>(readCsvFile(new File(WizardDuels.DATA_FOLDER, "de.csv")));
+        RU_RUSSIAN = new HashMap<>(readCsvFile(new File(WizardDuels.DATA_FOLDER, "ru.csv")));
+        UA_UKRAINIAN = new HashMap<>(readCsvFile(new File(WizardDuels.DATA_FOLDER, "ua.csv")));
+        LOL_LOLCAT = new HashMap<>(readCsvFile(new File(WizardDuels.DATA_FOLDER, "lol.csv")));
+        LA_LATIN = new HashMap<>(readCsvFile(new File(WizardDuels.DATA_FOLDER, "la.csv")));
+        ES_SPAIN = new HashMap<>(readCsvFile(new File(WizardDuels.DATA_FOLDER, "es.csv")));
     }
 
     public static String get(Locale locale, String key) {

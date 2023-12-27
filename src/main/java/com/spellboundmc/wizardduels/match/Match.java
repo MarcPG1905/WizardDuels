@@ -1,4 +1,4 @@
-package net.spellboundmc.match;
+package com.spellboundmc.wizardduels.match;
 
 public interface Match {
     enum PrePhase {

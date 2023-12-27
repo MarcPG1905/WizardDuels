@@ -1,4 +1,4 @@
-package net.spellboundmc;
+package com.spellboundmc.wizardduels;
 
 import com.marcpg.text.Completer;
 import net.kyori.adventure.text.Component;

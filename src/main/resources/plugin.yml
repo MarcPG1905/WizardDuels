@@ -8,16 +8,16 @@ description: Plugin for the SpellBoundMC "Wizard Duels" game mode.
 version: '${version}'
 
 ### Main Class ###
-main: net.spellboundmc.WizardDuels
+main: net.spellboundmc.wizardduels.WizardDuels
 
 ### PaperAPI Version ###
 api-version: '1.20'
 
-### Developers of the Plugin ###
+### Developer of the Plugin ###
 author: MarcPG1905
 
 ### Plugin Website ###
-website: https://wizardduels.com/
+website: https://spellboundmc.com/wizard-duels
 
 ### Plugin Prefix ###
 prefix: WD

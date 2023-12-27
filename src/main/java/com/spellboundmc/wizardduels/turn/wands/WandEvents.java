@@ -1,14 +1,14 @@
-package net.spellboundmc.turn.wands;
+package com.spellboundmc.wizardduels.turn.wands;
 
 import com.marcpg.color.McFormat;
 import com.marcpg.text.Formatter;
+import com.spellboundmc.wizardduels.PlayerData;
+import com.spellboundmc.wizardduels.match.Basic1v1;
+import com.spellboundmc.wizardduels.turn.spells.Spell;
 import io.papermc.paper.event.entity.EntityMoveEvent;
 import net.kyori.adventure.text.Component;
-import net.spellboundmc.PlayerData;
-import net.spellboundmc.WizardDuels;
-import net.spellboundmc.match.Basic1v1;
-import net.spellboundmc.other.Translation;
-import net.spellboundmc.turn.spells.Spell;
+import com.spellboundmc.wizardduels.WizardDuels;
+import com.spellboundmc.wizardduels.other.Translation;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.enchantments.Enchantment;

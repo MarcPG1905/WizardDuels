@@ -1,10 +1,10 @@
-package net.spellboundmc.other;
+package com.spellboundmc.wizardduels.other;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
-import net.spellboundmc.Config;
-import net.spellboundmc.WizardDuels;
-import net.spellboundmc.match.Basic1v1;
+import com.spellboundmc.wizardduels.Config;
+import com.spellboundmc.wizardduels.WizardDuels;
+import com.spellboundmc.wizardduels.match.Basic1v1;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;

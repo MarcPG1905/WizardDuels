@@ -1,13 +1,13 @@
-package net.spellboundmc.other;
+package com.spellboundmc.wizardduels.other;
 
+import com.spellboundmc.wizardduels.turn.wands.Wand;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.TextDecoration;
-import net.spellboundmc.PlayerData;
-import net.spellboundmc.WizardDuels;
-import net.spellboundmc.match.Basic1v1;
-import net.spellboundmc.turn.spells.Spell;
-import net.spellboundmc.turn.wands.Wand;
+import com.spellboundmc.wizardduels.PlayerData;
+import com.spellboundmc.wizardduels.WizardDuels;
+import com.spellboundmc.wizardduels.match.Basic1v1;
+import com.spellboundmc.wizardduels.turn.spells.Spell;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Sound;

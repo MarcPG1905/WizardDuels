@@ -1,16 +1,16 @@
-package net.spellboundmc.turn.wands;
+package com.spellboundmc.wizardduels.turn.wands;
 
 import com.destroystokyo.paper.ParticleBuilder;
 import com.marcpg.color.McFormat;
 import com.marcpg.util.Randomizer;
+import com.spellboundmc.wizardduels.turn.TurnData;
 import net.kyori.adventure.sound.SoundStop;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.title.Title;
-import net.spellboundmc.PlayerData;
-import net.spellboundmc.WizardDuels;
-import net.spellboundmc.match.Basic1v1;
-import net.spellboundmc.other.Translation;
-import net.spellboundmc.turn.TurnData;
+import com.spellboundmc.wizardduels.PlayerData;
+import com.spellboundmc.wizardduels.WizardDuels;
+import com.spellboundmc.wizardduels.match.Basic1v1;
+import com.spellboundmc.wizardduels.other.Translation;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
