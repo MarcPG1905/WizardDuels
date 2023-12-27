@@ -9,6 +9,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Fireball;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
@@ -29,7 +30,7 @@ public class SpellEvents implements Listener {
         Spell spell = Spell.getSpellPlaced(event.getBlock().getType());
         if (spell == null) return;
 
-        if (SpellUsage.spellUse(spell, event.getPlayer(), event.getBlock())) {
+        if (SpellUsage.spellUse(spell, event.getPlayer())) {
             Block block = event.getBlockPlaced();
             block.setType(block.getType());
         }
@@ -39,9 +40,9 @@ public class SpellEvents implements Listener {
     public void onBlockBreak(@NotNull BlockBreakEvent event) {
         if (WizardDuels.currentMatch == null) return;
 
-        Basic1v1 basic1v1 = (Basic1v1) WizardDuels.currentMatch;
-        PlayerData playerData = (event.getPlayer() == basic1v1.player1 ? basic1v1.playerData1 : basic1v1.playerData2);
-        PlayerData opponentData = (event.getPlayer() == basic1v1.player1 ? basic1v1.playerData2 : basic1v1.playerData1);
+        Basic1v1 match = (Basic1v1) WizardDuels.currentMatch;
+        PlayerData playerData = match.getPlayerData(event.getPlayer());
+        PlayerData opponentData = match.getOpponentData(event.getPlayer());
 
         if (event.getBlock().getType() == Material.DARK_PRISMARINE) {
             playerData.thunderEffect = false;
@@ -59,8 +60,10 @@ public class SpellEvents implements Listener {
     public void onPlayerMove(PlayerMoveEvent event) {
         if (WizardDuels.currentMatch == null) return;
 
-        Basic1v1 basic1v1 = (Basic1v1) WizardDuels.currentMatch;
-        PlayerData playerData = (event.getPlayer() == basic1v1.player1 ? basic1v1.playerData1 : basic1v1.playerData2);
+        Basic1v1 match = (Basic1v1) WizardDuels.currentMatch;
+        Player player = event.getPlayer();
+        PlayerData playerData = match.getPlayerData(player);
+
         if (playerData.cobwebCenter != null) {
             if (event.getFrom().getBlock().getType() == Material.COBWEB && event.getTo().getBlock().getType() != Material.COBWEB) {
                 if (playerData.cobwebCenter.distance(event.getFrom()) < playerData.cobwebCenter.distance(event.getTo())) {
@@ -70,8 +73,8 @@ public class SpellEvents implements Listener {
                         }
                     });
                     playerData.cobwebCenter = null;
-                    event.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 600, 0));
-                    (event.getPlayer() == basic1v1.player1 ? basic1v1.playerData2 : basic1v1.playerData1).spellCooldowns.put(Spell.getSpellPlaced(Material.COBWEB), 50);
+                    player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 600, 0));
+                    match.getOpponentData(player).spellCooldowns.put(Spell.getSpellPlaced(Material.COBWEB), 50);
                 }
             }
         }
@@ -81,20 +84,19 @@ public class SpellEvents implements Listener {
     public void onProjectileHit(@NotNull PlayerLaunchProjectileEvent event) {
         if (WizardDuels.currentMatch == null) return;
 
-        Basic1v1 basic1v1 = (Basic1v1) WizardDuels.currentMatch;
+        Basic1v1 match = (Basic1v1) WizardDuels.currentMatch;
         if (event.getProjectile() instanceof Fireball) {
-            PlayerData data = event.getPlayer() == basic1v1.player1 ? basic1v1.playerData1 : basic1v1.playerData2;
-            PlayerData dataOpponent = event.getPlayer() == basic1v1.player1 ? basic1v1.playerData2 : basic1v1.playerData1;
+            PlayerData playerData = match.getPlayerData(event.getPlayer());
 
-            if (data.fireballsLeft >= 0) {
-                data.fireballsLeft--;
-                Location loc = data.player.getLocation();
+            if (playerData.fireballsLeft >= 0) {
+                playerData.fireballsLeft--;
+                Location loc = playerData.player.getLocation();
                 loc.getWorld().spawn(loc.add(loc.getDirection().multiply(1)), Fireball.class);
 
-                if (data.fireballsLeft < 0) {
-                    data.spellCooldowns.put(Spell.NETHERRACK, 15);
+                if (playerData.fireballsLeft < 0) {
+                    playerData.spellCooldowns.put(Spell.NETHERRACK, 15);
                 }
-            } else if (dataOpponent.fireballsLeft >= 0) {
+            } else if (match.getOpponentData(event.getPlayer()).fireballsLeft >= 0) {
                 event.setCancelled(true);
             }
         }

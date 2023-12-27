@@ -31,16 +31,16 @@ public class InformationManager {
             updateBasic(match, true);
             updateBasic(match, false);
 
-            updateActionBar(match.playerData1);
-            updateActionBar(match.playerData2);
+            updateActionBar(match.getPlayerData1());
+            updateActionBar(match.getPlayerData2());
         }, 0, 20);
     }
 
     public static void updateBasic(@NotNull Basic1v1 match, boolean team1) {
-        Player player = (team1 ? match.player1 : match.player2);
+        Player player = (team1 ? match.getPlayer1() : match.getPlayer2());
         Locale l = player.locale();
 
-        PlayerData opponentData = (team1 ? match.playerData2 : match.playerData1);
+        PlayerData opponentData = match.getOpponentData(player);
 
         Scoreboard scoreboard = manager.getNewScoreboard();
         Objective objective = scoreboard.registerNewObjective("basic1v1", Criteria.DUMMY, Component.text(RED + "Wizard " + BLUE + "Duels " + RESET + "1v1"));

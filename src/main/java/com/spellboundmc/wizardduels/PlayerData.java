@@ -1,15 +1,14 @@
 package com.spellboundmc.wizardduels;
 
-import com.spellboundmc.wizardduels.turn.wands.Wand;
 import com.spellboundmc.wizardduels.turn.spells.Spell;
 import com.spellboundmc.wizardduels.turn.wands.Ability;
+import com.spellboundmc.wizardduels.turn.wands.Wand;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
 import java.util.*;
 
 public class PlayerData {
-
     public final Player player;
     public final HashMap<Spell, Integer> spellCooldowns = new HashMap<>(Map.of(
             Spell.GRASS_BLOCK, 0,

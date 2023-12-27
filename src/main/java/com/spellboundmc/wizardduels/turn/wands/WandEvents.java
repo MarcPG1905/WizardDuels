@@ -3,12 +3,12 @@ package com.spellboundmc.wizardduels.turn.wands;
 import com.marcpg.color.McFormat;
 import com.marcpg.text.Formatter;
 import com.spellboundmc.wizardduels.PlayerData;
+import com.spellboundmc.wizardduels.WizardDuels;
 import com.spellboundmc.wizardduels.match.Basic1v1;
+import com.spellboundmc.wizardduels.other.Translation;
 import com.spellboundmc.wizardduels.turn.spells.Spell;
 import io.papermc.paper.event.entity.EntityMoveEvent;
 import net.kyori.adventure.text.Component;
-import com.spellboundmc.wizardduels.WizardDuels;
-import com.spellboundmc.wizardduels.other.Translation;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.enchantments.Enchantment;
@@ -241,10 +241,10 @@ public class WandEvents implements Listener {
         if (event.getEntity() instanceof Skeleton skeleton) {
             if (!skeleton.getScoreboardTags().contains("venomous")) return;
 
-            Basic1v1 basic1v1 = (Basic1v1) WizardDuels.currentMatch; // TODO: Switch this to be compatible with 2v2 and Chaos too
-            Player target = basic1v1.player1 == basic1v1.POISON_SKELETONS ? basic1v1.player1 : basic1v1.player2;
-
-            if (event.getTarget() == basic1v1.POISON_SKELETONS) event.setTarget(target);
+            Basic1v1 match = (Basic1v1) WizardDuels.currentMatch;
+            if (event.getTarget() == match.POISON_SKELETONS) {
+                event.setTarget(match.getPlayerData(match.POISON_SKELETONS).player);
+            }
         }
     }
 
@@ -262,21 +262,21 @@ public class WandEvents implements Listener {
     @EventHandler
     public void onPlayerMove(PlayerMoveEvent event) {
         if (WizardDuels.currentMatch == null) return;
-        Basic1v1 basic1v1 = (Basic1v1) WizardDuels.currentMatch;
+        Basic1v1 match = (Basic1v1) WizardDuels.currentMatch;
 
-        if (basic1v1.ICY_FEET != null) {
-            if (basic1v1.ICY_FEET == event.getPlayer()) {
+        if (match.ICY_FEET != null) {
+            if (match.ICY_FEET == event.getPlayer()) {
                 Location loc = event.getPlayer().getLocation().subtract(0, 1, 0);
                 loc.getBlock().setType(Material.BLUE_ICE);
             }
         }
 
-        if (basic1v1.FIRE_RING != null) {
-            Location loc = basic1v1.FIRE_RING.getLocation();
+        if (match.FIRE_RING != null) {
+            Location loc = match.FIRE_RING.getLocation();
 
-            PlayerData playerData = basic1v1.player1 == basic1v1.FIRE_RING ? basic1v1.playerData1 : basic1v1.playerData2;
+            PlayerData playerData = match.getPlayerData(match.FIRE_RING);
 
-            if (basic1v1.FIRE_RING == event.getPlayer()) {
+            if (match.FIRE_RING == event.getPlayer()) {
                 for (int i = 0; i < 360; i += 3) {
                     double angle = Math.toRadians(i);
                     double x = loc.getX() + (playerData.boostedAbilities ? 15 : 10) * Math.cos(angle);
@@ -288,18 +288,18 @@ public class WandEvents implements Listener {
             }
 
             for (Player target : Bukkit.getOnlinePlayers()) {
-                if (target != basic1v1.FIRE_RING && loc.distance(target.getLocation()) <= (playerData.boostedAbilities ? 15 : 10)) {
+                if (target != match.FIRE_RING && loc.distance(target.getLocation()) <= (playerData.boostedAbilities ? 15 : 10)) {
                     target.setFireTicks(100);
                     target.damage(0.5);
                 }
             }
         }
 
-        if (basic1v1.ICE_STORM != null) {
-            Location loc = basic1v1.ICE_STORM.getLocation();
+        if (match.ICE_STORM != null) {
+            Location loc = match.ICE_STORM.getLocation();
 
             for (Player target : Bukkit.getOnlinePlayers()) {
-                if (target != basic1v1.ICE_STORM && loc.distance(target.getLocation()) <= 4.0) {
+                if (target != match.ICE_STORM && loc.distance(target.getLocation()) <= 4.0) {
                     Vector direction = target.getLocation().toVector().subtract(loc.toVector()).normalize();
 
                     target.setVelocity(direction.multiply(0.5));
@@ -307,8 +307,8 @@ public class WandEvents implements Listener {
             }
         }
 
-        if (basic1v1.OPPONENTS_NO_MOVEMENT != null) {
-            if (event.getPlayer() != basic1v1.OPPONENTS_NO_MOVEMENT) {
+        if (match.OPPONENTS_NO_MOVEMENT != null) {
+            if (event.getPlayer() != match.OPPONENTS_NO_MOVEMENT) {
                 event.setCancelled(true);
             }
         }
@@ -353,13 +353,13 @@ public class WandEvents implements Listener {
     @EventHandler
     public void onEntityMove(@NotNull EntityMoveEvent event) {
         if (WizardDuels.currentMatch == null) return;
-        Basic1v1 basic1v1 = (Basic1v1) WizardDuels.currentMatch;
+        Basic1v1 match = (Basic1v1) WizardDuels.currentMatch;
 
         if (event.getEntity() instanceof Projectile projectile) {
-            if (basic1v1.STORM_WALL == null) return;
+            if (match.STORM_WALL == null) return;
 
             for (Player target : Bukkit.getOnlinePlayers()) {
-                if (target != basic1v1.STORM_WALL && basic1v1.STORM_WALL.getLocation().distance(target.getLocation()) <= 2) {
+                if (target != match.STORM_WALL && match.STORM_WALL.getLocation().distance(target.getLocation()) <= 2) {
                     Vector currentVelocity = projectile.getVelocity();
                     Vector invertedVelocity = new Vector(-currentVelocity.getX(), -currentVelocity.getY(), -currentVelocity.getZ());
                     projectile.setVelocity(invertedVelocity);
@@ -371,14 +371,13 @@ public class WandEvents implements Listener {
     @EventHandler
     public void onEntityDamageByEntity(@NotNull EntityDamageByEntityEvent event) {
         if (WizardDuels.currentMatch == null) return;
-        Basic1v1 basic1v1 = (Basic1v1) WizardDuels.currentMatch;
 
         if (event.getDamager() instanceof LightningStrike) {
             event.setDamage(4);
         }
 
         if (event.getDamager() instanceof Player player) {
-            if (basic1v1.STORM_WALL == player) {
+            if (((Basic1v1) WizardDuels.currentMatch).STORM_WALL == player) {
                 event.setCancelled(true);
             }
         }
@@ -387,10 +386,9 @@ public class WandEvents implements Listener {
     @EventHandler
     public void onEntityDamage(@NotNull EntityDamageEvent event) {
         if (WizardDuels.currentMatch == null) return;
-        Basic1v1 basic1v1 = (Basic1v1) WizardDuels.currentMatch;
 
         if (event.getEntity() instanceof Player player) {
-            if (basic1v1.STORM_WALL == player) {
+            if (((Basic1v1) WizardDuels.currentMatch).STORM_WALL == player) {
                 event.setDamage(event.getDamage() / 2);
             }
         }
@@ -399,13 +397,17 @@ public class WandEvents implements Listener {
     @EventHandler
     public void onEntityDeath(@NotNull EntityDeathEvent event) {
         if (WizardDuels.currentMatch == null) return;
-        Basic1v1 basic1v1 = (Basic1v1) WizardDuels.currentMatch;
+        Basic1v1 match = (Basic1v1) WizardDuels.currentMatch;
 
         if (event.getEntity() instanceof EnderCrystal) {
             event.getDrops().clear();
-            if (basic1v1.playerData1.wandCrystalActive || basic1v1.playerData2.wandCrystalActive) {
-                basic1v1.playerData1.wandCrystalActive = false;
-                basic1v1.playerData2.wandCrystalActive = false;
+
+            PlayerData playerData1 = match.getPlayerData1();
+            PlayerData playerData2 = match.getPlayerData2();
+
+            if (playerData1.wandCrystalActive || playerData2.wandCrystalActive) {
+                playerData1.wandCrystalActive = false;
+                playerData2.wandCrystalActive = false;
 
                 for (Player player : WizardDuels.WORLD.getPlayers()) {
                     if (player.getNoDamageTicks() != 0 && player.getInventory().contains(Material.NETHERITE_SHOVEL)) {
@@ -414,13 +416,13 @@ public class WandEvents implements Listener {
                     }
                 }
             }
-            if (basic1v1.playerData1.spellCrystalActive) {
-                basic1v1.player1.setHealth(basic1v1.player1.getHealth() + 10);
-                basic1v1.playerData1.spellCooldowns.put(Spell.END_CRYSTAL, 35);
+            if (playerData1.spellCrystalActive) {
+                playerData1.player.setHealth(playerData1.player.getHealth() + 10);
+                playerData1.spellCooldowns.put(Spell.END_CRYSTAL, 35);
             }
-            if (basic1v1.playerData2.spellCrystalActive) {
-                basic1v1.player2.setHealth(basic1v1.player2.getHealth() + 10);
-                basic1v1.playerData2.spellCooldowns.put(Spell.END_CRYSTAL, 35);
+            if (playerData2.spellCrystalActive) {
+                playerData2.player.setHealth(playerData2.player.getHealth() + 10);
+                playerData2.spellCooldowns.put(Spell.END_CRYSTAL, 35);
             }
         }
         if (event.getEntity().getType() == EntityType.SKELETON) {
@@ -430,7 +432,7 @@ public class WandEvents implements Listener {
                     skeletonsLeft++;
                 }
             }
-            if (skeletonsLeft <= 0) basic1v1.POISON_SKELETONS = null;
+            if (skeletonsLeft <= 0) match.POISON_SKELETONS = null;
         }
     }
 

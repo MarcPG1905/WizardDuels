@@ -1,12 +1,12 @@
 package com.spellboundmc.wizardduels;
 
+import com.spellboundmc.wizardduels.match.GiveUpCommand;
 import com.spellboundmc.wizardduels.match.Match;
 import com.spellboundmc.wizardduels.match.StartCommand;
 import com.spellboundmc.wizardduels.other.GuiManager;
+import com.spellboundmc.wizardduels.other.Translation;
 import com.spellboundmc.wizardduels.turn.spells.SpellEvents;
 import com.spellboundmc.wizardduels.turn.wands.WandEvents;
-import com.spellboundmc.wizardduels.match.GiveUpCommand;
-import com.spellboundmc.wizardduels.other.Translation;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.plugin.Plugin;
@@ -46,6 +46,7 @@ public final class WizardDuels extends JavaPlugin {
 
     @Override
     public void onDisable() {
+        currentMatch.tie();
         LOG.info("Successfully stopped!");
     }
 }

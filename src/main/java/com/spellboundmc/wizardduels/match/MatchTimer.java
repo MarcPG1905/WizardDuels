@@ -2,9 +2,11 @@ package com.spellboundmc.wizardduels.match;
 
 import com.marcpg.data.time.Time;
 import com.marcpg.data.time.Timer;
+import com.spellboundmc.wizardduels.PlayerData;
 import com.spellboundmc.wizardduels.WizardDuels;
 import org.bukkit.Bukkit;
 import org.bukkit.scheduler.BukkitTask;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -26,24 +28,8 @@ public class MatchTimer implements Timer {
             time.decrement();
 
             if (match instanceof Basic1v1 basic1v1) {
-                cooldown(basic1v1.playerData1.abilityCooldowns);
-                cooldown(basic1v1.playerData1.spellCooldowns);
-
-                cooldown(basic1v1.playerData2.abilityCooldowns);
-                cooldown(basic1v1.playerData2.spellCooldowns);
-
-                if (basic1v1.playerData1.spellCrystalActive) {
-                    basic1v1.player1.setHealth(basic1v1.player1.getHealth() + 1);
-                }
-                if (basic1v1.playerData2.spellCrystalActive) {
-                    basic1v1.player2.setHealth(basic1v1.player2.getHealth() + 1);
-                }
-
-                basic1v1.playerData1.locationQueue.addFirst(basic1v1.player1.getLocation());
-                if (basic1v1.playerData1.locationQueue.size() > LOCATION_QUEUE_SIZE) basic1v1.playerData1.locationQueue.removeLast();
-
-                basic1v1.playerData2.locationQueue.addFirst(basic1v1.player2.getLocation());
-                if (basic1v1.playerData2.locationQueue.size() > LOCATION_QUEUE_SIZE) basic1v1.playerData2.locationQueue.removeLast();
+                doStuff(basic1v1.getPlayerData1());
+                doStuff(basic1v1.getPlayerData2());
             }
 
             if (time.getAs(Time.Unit.MINUTES) == 5) match.withering();
@@ -67,12 +53,24 @@ public class MatchTimer implements Timer {
         return new Time(480 - time.getAs(Time.Unit.SECONDS));
     }
 
-    public static <T> void cooldown(Map<T, Integer> cooldowns) {
+    private static <T> void cooldown(@NotNull Map<T, Integer> cooldowns) {
         HashMap<T, Integer> newMap = new HashMap<>();
         for (Map.Entry<T, Integer> entry : cooldowns.entrySet()) {
             newMap.put(entry.getKey(), entry.getValue() - 1);
         }
         cooldowns.clear();
         cooldowns.putAll(newMap);
+    }
+
+    private void doStuff(@NotNull PlayerData playerData) {
+        cooldown(playerData.abilityCooldowns);
+        cooldown(playerData.spellCooldowns);
+
+        if (playerData.spellCrystalActive)
+            playerData.player.setHealth(playerData.player.getHealth() + 1);
+
+        playerData.locationQueue.addFirst(playerData.player.getLocation());
+        if (playerData.locationQueue.size() > LOCATION_QUEUE_SIZE)
+            playerData.locationQueue.removeLast();
     }
 }

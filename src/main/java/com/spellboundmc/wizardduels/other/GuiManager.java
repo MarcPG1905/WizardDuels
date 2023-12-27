@@ -1,13 +1,14 @@
 package com.spellboundmc.wizardduels.other;
 
+import com.spellboundmc.wizardduels.PlayerData;
+import com.spellboundmc.wizardduels.WizardDuels;
+import com.spellboundmc.wizardduels.match.Basic1v1;
+import com.spellboundmc.wizardduels.match.Match;
+import com.spellboundmc.wizardduels.turn.spells.Spell;
 import com.spellboundmc.wizardduels.turn.wands.Wand;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.TextDecoration;
-import com.spellboundmc.wizardduels.PlayerData;
-import com.spellboundmc.wizardduels.WizardDuels;
-import com.spellboundmc.wizardduels.match.Basic1v1;
-import com.spellboundmc.wizardduels.turn.spells.Spell;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -55,11 +56,11 @@ public class GuiManager implements Listener {
                     default -> throw new IllegalStateException("Unexpected value: " + event.getSlot());
                 });
                 case MAP_SIZE -> match.mapSize = switch (event.getSlot()) {
-                    case 2 -> Basic1v1.MapSize.MINI;
-                    case 3 -> Basic1v1.MapSize.SMALL;
-                    case 4 -> Basic1v1.MapSize.NORMAL;
-                    case 5 -> Basic1v1.MapSize.BIG;
-                    case 6 -> Basic1v1.MapSize.HUGE;
+                    case 2 -> Match.MapSize.MINI;
+                    case 3 -> Match.MapSize.SMALL;
+                    case 4 -> Match.MapSize.NORMAL;
+                    case 5 -> Match.MapSize.BIG;
+                    case 6 -> Match.MapSize.HUGE;
                     default -> throw new IllegalStateException("Unexpected value: " + event.getSlot());
                 };
                 case TOKEN_AMOUNT -> {
@@ -70,8 +71,8 @@ public class GuiManager implements Listener {
                         case 6 -> 50;
                         default -> throw new IllegalStateException("Unexpected value: " + event.getSlot());
                     };
-                    match.playerData1.tokens = tokens;
-                    match.playerData2.tokens = tokens;
+                    match.getPlayerData1().tokens = tokens;
+                    match.getPlayerData2().tokens = tokens;
                 }
                 case WEATHER -> {
                     switch (event.getSlot()) {
@@ -87,18 +88,18 @@ public class GuiManager implements Listener {
                         }
                     }
 
-                    startShopDisplay(match.player1, match.playerData1);
-                    startShopDisplay(match.player2, match.playerData2);
+                    startShopDisplay(match.getPlayer1(), match.getPlayerData1());
+                    startShopDisplay(match.getPlayer2(), match.getPlayerData2());
 
                     new BukkitRunnable() {
                         int secsLeft = 60;
                         @Override
                         public void run() {
-                            match.player1.getInventory().setItem(14, new ItemStack(Material.IRON_NUGGET, secsLeft));
-                            match.player2.getInventory().setItem(14, new ItemStack(Material.IRON_NUGGET, secsLeft));
+                            match.getPlayer1().getInventory().setItem(14, new ItemStack(Material.IRON_NUGGET, secsLeft));
+                            match.getPlayer2().getInventory().setItem(14, new ItemStack(Material.IRON_NUGGET, secsLeft));
                             secsLeft--;
                             if (secsLeft <= 0) {
-                                match.startMain();
+                                WizardDuels.currentMatch.startMain();
                                 cancel();
                             }
                         }
@@ -115,8 +116,6 @@ public class GuiManager implements Listener {
             if (item == Material.BLACK_STAINED_GLASS_PANE) return;
 
             Player player = (Player) event.getWhoClicked();
-            PlayerData playerData = (match.player1 == player ? match.playerData1 : match.playerData2);
-            PlayerData opponentData = (match.player1 == player ? match.playerData2 : match.playerData1);
 
             if (title.contains("wands")) {
                 if (item == Material.DIRT) {
@@ -125,7 +124,7 @@ public class GuiManager implements Listener {
                     Wand wand = Wand.getWand(item);
                     if (wand != null) {
                         player.getInventory().setItem(0, new ItemStack(wand.item));
-                        playerData.selectedWand = wand;
+                        match.getPlayerData(player).selectedWand = wand;
                     }
                 }
             } else if (title.contains("spells")) {
@@ -140,6 +139,8 @@ public class GuiManager implements Listener {
                 } else if (item != Material.DIRT && item != Material.AIR) {
                     Spell spell = Spell.getSpellShop(item);
                     if (spell != null) {
+                        PlayerData playerData = match.getPlayerData(player);
+
                         if (playerData.tokens >= spell.price && (player.getInventory().getItem(7) == null || Objects.requireNonNull(player.getInventory().getItem(7)).isEmpty())) {
                             playerData.tokens -= spell.price;
                             player.getInventory().addItem(new ItemStack(spell.shopItem));
@@ -149,7 +150,7 @@ public class GuiManager implements Listener {
 
                             if (player.getInventory().getItem(7) != null || !Objects.requireNonNull(player.getInventory().getItem(7)).isEmpty()) {
                                 playerData.shopDone = true;
-                                if (opponentData.shopDone) match.startMain();
+                                if (match.getOpponentData(player).shopDone) WizardDuels.currentMatch.startMain();
                             }
                         } else {
                             player.playSound(player, Sound.ENTITY_VILLAGER_NO, 1.0f, 1.0f);

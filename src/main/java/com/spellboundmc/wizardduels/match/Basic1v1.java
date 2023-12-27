@@ -1,13 +1,13 @@
 package com.spellboundmc.wizardduels.match;
 
 import com.spellboundmc.wizardduels.PlayerData;
+import com.spellboundmc.wizardduels.WizardDuels;
 import com.spellboundmc.wizardduels.other.GuiManager;
+import com.spellboundmc.wizardduels.other.InformationManager;
+import com.spellboundmc.wizardduels.other.Translation;
 import com.spellboundmc.wizardduels.turn.TurnData;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.title.Title;
-import com.spellboundmc.wizardduels.WizardDuels;
-import com.spellboundmc.wizardduels.other.InformationManager;
-import com.spellboundmc.wizardduels.other.Translation;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -27,27 +27,13 @@ import static com.marcpg.color.McFormat.*;
  * Duos2v2 is where two players compete with each other.
  */
 public class Basic1v1 implements Match {
-    public enum MapSize {
-        MINI(8), SMALL(16), NORMAL(32), BIG(64), HUGE(128);
-
-        public final int size;
-
-        MapSize(int size) {
-            this.size = size;
-        }
-
-        public @NotNull String translate(Locale locale) {
-            return Translation.get(locale, "scoreboard.map_size." + name().toLowerCase()) + " ("+size+"x"+size+")";
-        }
-    }
-
     public final List<TurnData> history = new ArrayList<>();
-    public final Player player1;
-    public final Player player2;
-    public final PlayerData playerData1;
-    public final PlayerData playerData2;
+    private final Player player1;
+    private final Player player2;
+    private final PlayerData playerData1;
+    private final PlayerData playerData2;
     public final MatchTimer timer;
-    public MapSize mapSize = null;
+    public Match.MapSize mapSize = null;
     public Player ICE_STORM, FIRE_RING, ICY_FEET, OPPONENTS_NO_MOVEMENT, POISON_SKELETONS, NO_GRAVITATION, STORM_WALL;
     public PrePhase prePhase = PrePhase.NONE;
 
@@ -60,6 +46,30 @@ public class Basic1v1 implements Match {
         timer = new MatchTimer(this);
 
         nextPrePhase();
+    }
+
+    public Player getPlayer1() {
+        return player1;
+    }
+
+    public Player getPlayer2() {
+        return player2;
+    }
+
+    public PlayerData getPlayerData1() {
+        return playerData1;
+    }
+
+    public PlayerData getPlayerData2() {
+        return playerData2;
+    }
+
+    public PlayerData getPlayerData(Player player) {
+        return player == player1 ? playerData1 : playerData2;
+    }
+
+    public PlayerData getOpponentData(Player player) {
+        return player == player1 ? playerData2 : playerData1;
     }
 
     public void nextPrePhase() {
@@ -98,6 +108,7 @@ public class Basic1v1 implements Match {
         }
     }
 
+    @Override
     public void startMain() {
         player1.closeInventory(InventoryCloseEvent.Reason.PLUGIN);
         player2.closeInventory(InventoryCloseEvent.Reason.PLUGIN);
@@ -127,9 +138,11 @@ public class Basic1v1 implements Match {
         player1.getWorld().getPlayers().forEach(p -> p.sendActionBar(Component.text(Translation.get(p.locale(), "match.withering"))));
     }
 
+    @Override
     public void lose(Player loser) {
         Bukkit.getScheduler().runTaskLater(WizardDuels.PLUGIN, () -> {
             Player winner = loser == player1 ? player2 : player1;
+
             Locale ll = loser.locale();
             Locale wl = winner.locale();
 
@@ -137,10 +150,13 @@ public class Basic1v1 implements Match {
             loser.sendMessage(Component.text(RED + Translation.get(ll, "match.lose.chat")));
 
             winner.showTitle(Title.title(Component.text(GREEN + Translation.get(wl, "match.win")), Component.text(Translation.get(wl, "match.win.text"))));
-            winner.sendMessage(Component.text(GREEN + Translation.get(ll, "match.win.chat")));
+            winner.sendMessage(Component.text(GREEN + Translation.get(wl, "match.win.chat")));
+
+            reset();
         }, 20);
     }
 
+    @Override
     public void tie() {
         Bukkit.getScheduler().runTaskLater(WizardDuels.PLUGIN, () -> {
             for (Player player : player1.getWorld().getPlayers()) {
@@ -148,7 +164,23 @@ public class Basic1v1 implements Match {
                 player.showTitle(Title.title(Component.text(YELLOW + Translation.get(l, "match.tie")), Component.text(Translation.get(l, "match.tie.text"))));
                 player.sendMessage(Component.text(YELLOW + Translation.get(l, "match.tie.chat")));
             }
+            reset();
         }, 20);
+    }
+
+    @Override
+    public void reset() {
+        mapSize = null;
+        ICE_STORM = null;
+        FIRE_RING = null;
+        ICY_FEET = null;
+        OPPONENTS_NO_MOVEMENT = null;
+        POISON_SKELETONS = null;
+        NO_GRAVITATION = null;
+        STORM_WALL = null;
+        prePhase = null;
+
+        WizardDuels.currentMatch = null;
     }
 
     public static @NotNull ItemStack item(Material material, Component name) {

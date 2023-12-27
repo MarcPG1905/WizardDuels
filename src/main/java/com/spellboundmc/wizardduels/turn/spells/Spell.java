@@ -1,10 +1,10 @@
 package com.spellboundmc.wizardduels.turn.spells;
 
 import com.marcpg.text.Formatter;
+import com.spellboundmc.wizardduels.other.Translation;
+import com.spellboundmc.wizardduels.turn.Turn;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
-import com.spellboundmc.wizardduels.turn.Turn;
-import com.spellboundmc.wizardduels.other.Translation;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;

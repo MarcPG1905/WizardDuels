@@ -3,14 +3,14 @@ package com.spellboundmc.wizardduels.turn.wands;
 import com.destroystokyo.paper.ParticleBuilder;
 import com.marcpg.color.McFormat;
 import com.marcpg.util.Randomizer;
-import com.spellboundmc.wizardduels.turn.TurnData;
-import net.kyori.adventure.sound.SoundStop;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.title.Title;
 import com.spellboundmc.wizardduels.PlayerData;
 import com.spellboundmc.wizardduels.WizardDuels;
 import com.spellboundmc.wizardduels.match.Basic1v1;
 import com.spellboundmc.wizardduels.other.Translation;
+import com.spellboundmc.wizardduels.turn.TurnData;
+import net.kyori.adventure.sound.SoundStop;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.title.Title;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -72,10 +72,10 @@ public class WandUsage {
         Location loc = player.getLocation();
         World world = player.getWorld();
 
-        Basic1v1 basic1v1 = (Basic1v1) WizardDuels.currentMatch;
+        Basic1v1 match = (Basic1v1) WizardDuels.currentMatch;
 
-        PlayerData playerData = basic1v1.player1 == player ? basic1v1.playerData1 : basic1v1.playerData2;
-        PlayerData opponentData = basic1v1.player1 == player ? basic1v1.playerData2 : basic1v1.playerData1;
+        PlayerData playerData = match.getPlayerData(player);
+        PlayerData opponentData = match.getOpponentData(player);
 
         if (playerData.disabledWands) {
             player.sendMessage(McFormat.RED + Translation.get(l, "wand.error.disabled"));
@@ -157,18 +157,18 @@ public class WandUsage {
                 opponentData.player.stopSound(SoundStop.named(Sound.ENTITY_EVOKER_FANGS_ATTACK));
             }
             case ICE_ROAD -> {
-                basic1v1.ICY_FEET = player;
+                match.ICY_FEET = player;
                 player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, b(playerData, 200, 400), 1));
 
-                Bukkit.getScheduler().runTaskLater(WizardDuels.getPlugin(WizardDuels.class), () -> basic1v1.ICY_FEET = null, 200L);
+                Bukkit.getScheduler().runTaskLater(WizardDuels.getPlugin(WizardDuels.class), () -> match.ICY_FEET = null, 200L);
             }
             case FREEZE -> {
-                basic1v1.OPPONENTS_NO_MOVEMENT = player;
-                Bukkit.getScheduler().runTaskLater(WizardDuels.getPlugin(WizardDuels.class), () -> basic1v1.OPPONENTS_NO_MOVEMENT = null, b(playerData, 100, 200));
+                match.OPPONENTS_NO_MOVEMENT = player;
+                Bukkit.getScheduler().runTaskLater(WizardDuels.getPlugin(WizardDuels.class), () -> match.OPPONENTS_NO_MOVEMENT = null, b(playerData, 100, 200));
             }
             case ICE_STORM -> {
-                basic1v1.ICE_STORM = player;
-                Bukkit.getScheduler().runTaskLater(WizardDuels.getPlugin(WizardDuels.class), () -> basic1v1.ICE_STORM = null, 200L);
+                match.ICE_STORM = player;
+                Bukkit.getScheduler().runTaskLater(WizardDuels.getPlugin(WizardDuels.class), () -> match.ICE_STORM = null, 200L);
 
                 new BukkitRunnable() {
                     double angle = 0;
@@ -179,7 +179,7 @@ public class WandUsage {
                         player.playSound(player.getLocation(), Sound.ENTITY_HORSE_BREATHE, 0.5f, 1.0f);
 
                         if (duration >= 10) {
-                            basic1v1.ICE_STORM = null;
+                            match.ICE_STORM = null;
                             cancel();
                         }
 
@@ -223,11 +223,11 @@ public class WandUsage {
                 }
             }
             case POSITION_SWAP -> {
-                Location location1 = basic1v1.player1.getLocation();
-                basic1v1.player1.teleport(basic1v1.player2);
-                basic1v1.player1.playSound(basic1v1.player1, Sound.ENTITY_ENDERMAN_TELEPORT, 1.0f, 1.0f);
-                basic1v1.player2.teleport(location1);
-                basic1v1.player2.playSound(basic1v1.player2, Sound.ENTITY_ENDERMAN_TELEPORT, 1.0f, 1.0f);
+                Location location1 = playerData.player.getLocation();
+                playerData.player.teleport(opponentData.player);
+                playerData.player.playSound(playerData.player, Sound.ENTITY_ENDERMAN_TELEPORT, 1.0f, 1.0f);
+                opponentData.player.teleport(location1);
+                opponentData.player.playSound(opponentData.player, Sound.ENTITY_ENDERMAN_TELEPORT, 1.0f, 1.0f);
             }
 
             // ============ DRAGON =============
@@ -348,8 +348,8 @@ public class WandUsage {
             }
             case FIRE_RING -> {
                 player.playSound(loc, Sound.ITEM_FLINTANDSTEEL_USE, 1.5f, 1.0f);
-                basic1v1.FIRE_RING = player;
-                Bukkit.getScheduler().runTaskLater(WizardDuels.getPlugin(WizardDuels.class), () -> basic1v1.FIRE_RING = null, b(playerData, 200, 300));
+                match.FIRE_RING = player;
+                Bukkit.getScheduler().runTaskLater(WizardDuels.getPlugin(WizardDuels.class), () -> match.FIRE_RING = null, b(playerData, 200, 300));
             }
 
             // ============ WEATHER ============
@@ -462,12 +462,12 @@ public class WandUsage {
                 });
             }
             case LOW_GRAVITY -> {
-                basic1v1.NO_GRAVITATION = player;
+                match.NO_GRAVITATION = player;
                 player.setGravity(false);
 
                 Bukkit.getScheduler().runTaskLater(WizardDuels.getPlugin(WizardDuels.class), () -> {
                     player.setGravity(true);
-                    basic1v1.NO_GRAVITATION = null;
+                    match.NO_GRAVITATION = null;
                     player.setNoDamageTicks(40);
                 }, b(playerData, 200, 300));
             }
@@ -707,12 +707,12 @@ public class WandUsage {
                     skeleton.addScoreboardTag("venomous");
                     skeleton.setTarget(opponentData.player);
                 }
-                basic1v1.POISON_SKELETONS = player;
+                match.POISON_SKELETONS = player;
 
                 new BukkitRunnable() {
                     @Override
                     public void run() {
-                        if (basic1v1.POISON_SKELETONS == null) cancel();
+                        if (match.POISON_SKELETONS == null) cancel();
 
                         for (LivingEntity entity : world.getLivingEntities()) {
                             if (entity.getScoreboardTags().contains("venomous")) {
@@ -907,7 +907,7 @@ public class WandUsage {
                 potion.setPotionMeta(meta);
             }
         }
-        basic1v1.history.add(new TurnData(ability, true, playerData, LocalDateTime.now()));
+        match.history.add(new TurnData(ability, true, playerData, LocalDateTime.now()));
     }
 
     @Contract(pure = true)

@@ -1,10 +1,10 @@
 package com.spellboundmc.wizardduels.match;
 
 import com.marcpg.text.Completer;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.TextColor;
 import com.spellboundmc.wizardduels.Config;
 import com.spellboundmc.wizardduels.WizardDuels;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;

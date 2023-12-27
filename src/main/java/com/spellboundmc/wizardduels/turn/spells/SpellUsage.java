@@ -9,7 +9,6 @@ import com.spellboundmc.wizardduels.turn.TurnData;
 import com.spellboundmc.wizardduels.turn.wands.WandUsage;
 import net.kyori.adventure.text.Component;
 import org.bukkit.*;
-import org.bukkit.block.Block;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.*;
 import org.bukkit.inventory.ItemStack;
@@ -20,14 +19,13 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 
 public class SpellUsage {
-    public static boolean spellUse(Spell spell, @NotNull Player player, Block block) {
+    public static boolean spellUse(Spell spell, @NotNull Player player) {
         Location loc = player.getLocation();
         World world = player.getWorld();
 
-        Basic1v1 basic1v1 = (Basic1v1) WizardDuels.currentMatch;
-
-        PlayerData playerData = basic1v1.player1 == player ? basic1v1.playerData1 : basic1v1.playerData2;
-        PlayerData opponentData = basic1v1.player1 == player ? basic1v1.playerData2 : basic1v1.playerData1;
+        Basic1v1 match = (Basic1v1) WizardDuels.currentMatch;
+        PlayerData playerData = match.getPlayerData(player);
+        PlayerData opponentData = match.getOpponentData(player);
 
         HashMap<Spell, Integer> map = playerData.spellCooldowns;
         if (map.get(spell) == null) {
@@ -141,7 +139,7 @@ public class SpellUsage {
                 if (playerData.waterBucketLevel < 3) playerData.waterBucketLevel++;
             }
             case PISTON -> {
-                int blocks = basic1v1.mapSize.ordinal() * 2 + 4;
+                int blocks = match.mapSize.ordinal() * 2 + 4;
                 for (Player p : WizardDuels.WORLD.getPlayers()) {
                     if (p != player) {
                         p.playSound(p, Sound.BLOCK_PISTON_EXTEND, 2.0f, 1.0f);
@@ -194,7 +192,7 @@ public class SpellUsage {
                 }
             }
         }
-        basic1v1.history.add(new TurnData(spell, true, playerData, LocalDateTime.now()));
+        match.history.add(new TurnData(spell, true, playerData, LocalDateTime.now()));
         return true;
     }
 }
