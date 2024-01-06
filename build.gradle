@@ -20,12 +20,16 @@ repositories {
         name = 'papermc-repo'
         url = 'https://repo.papermc.io/repository/maven-public/'
     }
-    mavenLocal()
+    maven {
+        name = 'marcpg-repo'
+        url = 'https://marcpg.com/repo/'
+    }
 }
 
 dependencies {
-    implementation 'com.marcpg:libpg:0.0.2' // LibPG for some custom stuff
-    implementation 'io.papermc.paper:paper-api:1.20.4-R0.1-SNAPSHOT' // Just Paper
+    compileOnly 'io.papermc.paper:paper-api:1.20.4-R0.1-SNAPSHOT' // Just Paper
+    implementation 'com.marcpg:libpg:0.0.3' // LibPG for some custom stuff
+    implementation 'net.hectus:HectusUtilities:0.1' // Hectus Utilities for database and translations
     implementation 'com.opencsv:opencsv:5.9' // OpenCSV is a library for parsing CSV files
 }
 
