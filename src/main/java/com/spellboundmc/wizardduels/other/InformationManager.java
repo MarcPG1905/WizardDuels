@@ -6,6 +6,7 @@ import com.spellboundmc.wizardduels.WizardDuels;
 import com.spellboundmc.wizardduels.match.Basic1v1;
 import com.spellboundmc.wizardduels.turn.spells.Spell;
 import com.spellboundmc.wizardduels.turn.wands.Wand;
+import net.hectus.Translation;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.Bukkit;
@@ -47,17 +48,17 @@ public class InformationManager {
         objective.setDisplaySlot(DisplaySlot.SIDEBAR);
 
         List<Score> scores = List.of(
-                objective.getScore(GREEN + Translation.get(l, "scoreboard.hp.team") + (int) player.getHealth()),
-                objective.getScore(GREEN + Translation.get(l, "scoreboard.hp.enemy") + (int) opponentData.player.getHealth()),
+                objective.getScore(GREEN + Translation.string(l, "scoreboard.hp.team") + (int) player.getHealth()),
+                objective.getScore(GREEN + Translation.string(l, "scoreboard.hp.enemy") + (int) opponentData.player.getHealth()),
                 objective.getScore(" "),
-                objective.getScore(GOLD + Translation.get(l, "scoreboard.match_rank") + "1.0"),
+                objective.getScore(GOLD + Translation.string(l, "scoreboard.match_rank") + "1.0"),
                 objective.getScore("  "),
-                objective.getScore(DARK_RED + Translation.get(l, "scoreboard.enemy_wand") + Translation.get(l, opponentData.selectedWand.translationKey())),
+                objective.getScore(DARK_RED + Translation.string(l, "scoreboard.enemy_wand") + Translation.string(l, opponentData.selectedWand.translationKey())),
                 objective.getScore("   "),
-                objective.getScore(BLUE + Translation.get(l, "scoreboard.time") + match.timer.getLeft().getOneUnitFormatted()),
+                objective.getScore(BLUE + Translation.string(l, "scoreboard.time") + match.timer.getLeft().getOneUnitFormatted()),
                 objective.getScore("    "),
-                objective.getScore(GRAY + Translation.get(l, "scoreboard.map") + "PLACEHOLDER"),
-                objective.getScore(GRAY + Translation.get(l, "scoreboard.map_size") + match.mapSize.translate(l))
+                objective.getScore(GRAY + Translation.string(l, "scoreboard.map") + "PLACEHOLDER"),
+                objective.getScore(GRAY + Translation.string(l, "scoreboard.map_size") + match.mapSize.translate(l))
         );
 
         for (int i = scores.size() - 1; i >= 0; i--) {

@@ -1,15 +1,15 @@
 package com.spellboundmc.wizardduels.turn.wands;
 
 import com.destroystokyo.paper.ParticleBuilder;
-import com.marcpg.color.McFormat;
 import com.marcpg.util.Randomizer;
 import com.spellboundmc.wizardduels.PlayerData;
 import com.spellboundmc.wizardduels.WizardDuels;
 import com.spellboundmc.wizardduels.match.Basic1v1;
-import com.spellboundmc.wizardduels.other.Translation;
 import com.spellboundmc.wizardduels.turn.TurnData;
+import net.hectus.Translation;
 import net.kyori.adventure.sound.SoundStop;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.title.Title;
 import org.bukkit.*;
 import org.bukkit.block.Block;
@@ -78,7 +78,7 @@ public class WandUsage {
         PlayerData opponentData = match.getOpponentData(player);
 
         if (playerData.disabledWands) {
-            player.sendMessage(McFormat.RED + Translation.get(l, "wand.error.disabled"));
+            player.sendMessage(Translation.component(l, "wand.error.disabled").color(NamedTextColor.RED));
             return;
         }
 
@@ -202,7 +202,7 @@ public class WandUsage {
 
                 Block block = player.getTargetBlockExact(b(playerData, 10, 20));
                 if (block == null) {
-                    player.sendMessage(McFormat.YELLOW + Translation.get(l, "wand.error.range", b(playerData, 10, 20)));
+                    player.sendMessage(Translation.component(l, "wand.error.range", b(playerData, 10, 20)).color(NamedTextColor.YELLOW));
                     return;
                 }
                 // TODO: Check if the block is inside the map
@@ -234,7 +234,7 @@ public class WandUsage {
             case DRAGONS_BREATH -> {
                 Block block = player.getTargetBlockExact(b(playerData, 10, 20));
                 if (block == null) {
-                    player.sendMessage(McFormat.YELLOW + Translation.get(l, "wand.error.range", b(playerData, 10, 20)));
+                    player.sendMessage(Translation.component(l, "wand.error.range", b(playerData, 10, 20)).color(NamedTextColor.YELLOW));
                     return;
                 }
                 Location spawnLocation = block.getLocation().clone().add(0, 1, 0);
@@ -418,7 +418,7 @@ public class WandUsage {
             case CTRL_Z -> {
                 Location timeDestination = playerData.locationQueue.get(5);
                 if (timeDestination == null) {
-                    player.sendMessage(Translation.get(l, "wand.time.time_error"));
+                    player.sendMessage(Translation.component(l, "wand.time.time_error").color(NamedTextColor.RED));
                     return;
                 }
                 player.teleport(timeDestination);
@@ -614,11 +614,11 @@ public class WandUsage {
             case SCULK_TELEPORT -> {
                 Block block = player.getTargetBlockExact(99);
                 if (block == null) {
-                    player.sendMessage(McFormat.YELLOW + Translation.get(l, "wand.error.range", 99));
+                    player.sendMessage(Translation.component(l, "wand.error.range", 99).color(NamedTextColor.YELLOW));
                     return;
                 }
                 if (!block.getType().name().contains("SCULK")) {
-                    player.sendMessage(McFormat.YELLOW + Translation.get(l, "wand.sculk.rmb.error"));
+                    player.sendMessage(Translation.component(l, "wand.sculk.rmb.error").color(NamedTextColor.YELLOW));
                     return;
                 }
                 // TODO: Check if the block is inside the map
@@ -680,7 +680,7 @@ public class WandUsage {
                     }
                 }
                 if (!closest.hasPotionEffect(PotionEffectType.POISON)) {
-                    player.sendMessage(McFormat.YELLOW + Translation.get(l, "wand.venom.rmb.error"));
+                    player.sendMessage(Translation.component(l, "wand.venom.rmb.error").color(NamedTextColor.YELLOW));
                     return;
                 }
                 player.teleport(closest);
@@ -790,7 +790,7 @@ public class WandUsage {
                     wandUse(Randomizer.fromCollection(abilities), player);
                 } else {
                     player.playSound(player, Sound.BLOCK_GLASS_BREAK, 0.5f, 0.8f);
-                    player.sendMessage(McFormat.YELLOW + Translation.get(l, "wand.glitch.lmb.fail"));
+                    player.sendMessage(Translation.component(l, "wand.glitch.lmb.fail").color(NamedTextColor.YELLOW));
                 }
             }
             case GLITCH_DASH -> {
@@ -807,10 +807,10 @@ public class WandUsage {
             case VIRUS -> {
                 int seconds = specialRandom10();
                 opponentData.disabledWands = true;
-                opponentData.player.showTitle(Title.title(Component.empty(), Component.text(McFormat.RED + Translation.get(l, "wand.glitch.slmb.opponent_title", seconds)), Title.Times.times(Duration.ZERO, Duration.ofSeconds(seconds / 2), Duration.ZERO)));
+                opponentData.player.showTitle(Title.title(Component.empty(), Translation.component(l, "wand.glitch.slmb.opponent_title", seconds).color(NamedTextColor.RED), Title.Times.times(Duration.ZERO, Duration.ofSeconds(seconds / 2), Duration.ZERO)));
                 Bukkit.getScheduler().runTaskLater(WizardDuels.getPlugin(WizardDuels.class), () -> {
                     opponentData.disabledWands = false;
-                    opponentData.player.sendMessage(McFormat.GREEN + Translation.get(l, "wand.glitch.slmb.opponent_end"));
+                    opponentData.player.sendMessage(Translation.component(l, "wand.glitch.slmb.opponent_end").color(NamedTextColor.GREEN));
                 }, seconds * 20L);
             }
             case GLITCH_SUMMON -> {
@@ -829,7 +829,7 @@ public class WandUsage {
 
                 Block block = player.getTargetBlockExact(10);
                 if (block == null) {
-                    player.sendMessage(McFormat.YELLOW + Translation.get(l, "wand.error.range", 10));
+                    player.sendMessage(Translation.component(l, "wand.error.range", 10).color(NamedTextColor.YELLOW));
                     return;
                 }
                 // TODO: Check if the block is inside the map

@@ -1,8 +1,8 @@
 package com.spellboundmc.wizardduels.turn.wands;
 
 import com.marcpg.text.Formatter;
-import com.spellboundmc.wizardduels.other.Translation;
 import com.spellboundmc.wizardduels.turn.Turn;
+import net.hectus.Translation;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -50,7 +50,7 @@ public enum Wand implements Turn {
 
     @Override
     public @NotNull String text(Player player, boolean translated) {
-        return translated ? Translation.get(player.locale(), translationKey()) : Formatter.toPascalCase(name());
+        return translated ? Translation.string(player.locale(), translationKey()) : Formatter.toPascalCase(name());
     }
 
     @Override

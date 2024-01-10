@@ -5,10 +5,11 @@ import com.marcpg.text.Formatter;
 import com.spellboundmc.wizardduels.PlayerData;
 import com.spellboundmc.wizardduels.WizardDuels;
 import com.spellboundmc.wizardduels.match.Basic1v1;
-import com.spellboundmc.wizardduels.other.Translation;
 import com.spellboundmc.wizardduels.turn.spells.Spell;
 import io.papermc.paper.event.entity.EntityMoveEvent;
+import net.hectus.Translation;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.enchantments.Enchantment;
@@ -412,7 +413,7 @@ public class WandEvents implements Listener {
                 for (Player player : WizardDuels.WORLD.getPlayers()) {
                     if (player.getNoDamageTicks() != 0 && player.getInventory().contains(Material.NETHERITE_SHOVEL)) {
                         player.setNoDamageTicks(1);
-                        player.sendMessage(McFormat.RED + Translation.get(player.locale(), "wand.dragon.srmb.end"));
+                        player.sendMessage(Translation.component(player.locale(), "wand.dragon.srmb.end").color(NamedTextColor.RED));
                     }
                 }
             }

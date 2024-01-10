@@ -4,9 +4,10 @@ import com.spellboundmc.wizardduels.PlayerData;
 import com.spellboundmc.wizardduels.WizardDuels;
 import com.spellboundmc.wizardduels.other.GuiManager;
 import com.spellboundmc.wizardduels.other.InformationManager;
-import com.spellboundmc.wizardduels.other.Translation;
 import com.spellboundmc.wizardduels.turn.TurnData;
+import net.hectus.Translation;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.title.Title;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -21,8 +22,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-import static com.marcpg.color.McFormat.*;
-
 /**
  * Duos2v2 is where two players compete with each other.
  */
@@ -34,7 +33,7 @@ public class Basic1v1 implements Match {
     private final PlayerData playerData2;
     public final MatchTimer timer;
     public Match.MapSize mapSize = null;
-    public Player ICE_STORM, FIRE_RING, ICY_FEET, OPPONENTS_NO_MOVEMENT, POISON_SKELETONS, NO_GRAVITATION, STORM_WALL;
+    public Player ICE_STORM, FIRE_RING, ICY_FEET, OPPONENTS_NO_MOVEMENT, POISON_SKELETONS, NO_GRAVITATION, STORM_WALL; // TODO: Add no gravitation feature
     public PrePhase prePhase = PrePhase.NONE;
 
     public Basic1v1(@NotNull Player player1, @NotNull Player player2) {
@@ -135,7 +134,7 @@ public class Basic1v1 implements Match {
         player1.addPotionEffect(new PotionEffect(PotionEffectType.WITHER, -1, 0, true, false, false));
         player2.addPotionEffect(new PotionEffect(PotionEffectType.WITHER, -1, 0, true, false, false));
 
-        player1.getWorld().getPlayers().forEach(p -> p.sendActionBar(Component.text(Translation.get(p.locale(), "match.withering"))));
+        player1.getWorld().getPlayers().forEach(p -> p.sendActionBar(Translation.component(p.locale(), "match.withering").color(NamedTextColor.RED)));
     }
 
     @Override
@@ -146,11 +145,11 @@ public class Basic1v1 implements Match {
             Locale ll = loser.locale();
             Locale wl = winner.locale();
 
-            loser.showTitle(Title.title(Component.text(RED + Translation.get(ll, "match.lose")), Component.text(Translation.get(ll, "match.lose.text"))));
-            loser.sendMessage(Component.text(RED + Translation.get(ll, "match.lose.chat")));
+            loser.showTitle(Title.title(Translation.component(ll, "match.lose").color(NamedTextColor.RED), Translation.component(ll, "match.lose.text")));
+            loser.sendMessage(Translation.component(ll, "match.lose.chat").color(NamedTextColor.RED));
 
-            winner.showTitle(Title.title(Component.text(GREEN + Translation.get(wl, "match.win")), Component.text(Translation.get(wl, "match.win.text"))));
-            winner.sendMessage(Component.text(GREEN + Translation.get(wl, "match.win.chat")));
+            winner.showTitle(Title.title(Translation.component(wl, "match.win").color(NamedTextColor.GREEN), Translation.component(wl, "match.win.text")));
+            winner.sendMessage(Translation.component(wl, "match.win.chat").color(NamedTextColor.GREEN));
 
             reset();
         }, 20);
@@ -161,8 +160,8 @@ public class Basic1v1 implements Match {
         Bukkit.getScheduler().runTaskLater(WizardDuels.PLUGIN, () -> {
             for (Player player : player1.getWorld().getPlayers()) {
                 Locale l = player.locale();
-                player.showTitle(Title.title(Component.text(YELLOW + Translation.get(l, "match.tie")), Component.text(Translation.get(l, "match.tie.text"))));
-                player.sendMessage(Component.text(YELLOW + Translation.get(l, "match.tie.chat")));
+                player.showTitle(Title.title(Translation.component(l, "match.tie").color(NamedTextColor.YELLOW), Translation.component(l, "match.tie.text")));
+                player.sendMessage(Translation.component(l, "match.tie.chat").color(NamedTextColor.YELLOW));
             }
             reset();
         }, 20);

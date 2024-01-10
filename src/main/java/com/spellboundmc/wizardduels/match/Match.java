@@ -1,6 +1,6 @@
 package com.spellboundmc.wizardduels.match;
 
-import com.spellboundmc.wizardduels.other.Translation;
+import net.hectus.Translation;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
@@ -17,7 +17,7 @@ public interface Match {
         }
 
         public @NotNull String translate(Locale locale) {
-            return Translation.get(locale, "scoreboard.map_size." + name().toLowerCase()) + " ("+size+"x"+size+")";
+            return Translation.string(locale, "scoreboard.map_size." + name().toLowerCase()) + " ("+size+"x"+size+")";
         }
     }
 

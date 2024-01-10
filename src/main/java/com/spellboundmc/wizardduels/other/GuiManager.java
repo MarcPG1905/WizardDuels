@@ -6,6 +6,7 @@ import com.spellboundmc.wizardduels.match.Basic1v1;
 import com.spellboundmc.wizardduels.match.Match;
 import com.spellboundmc.wizardduels.turn.spells.Spell;
 import com.spellboundmc.wizardduels.turn.wands.Wand;
+import net.hectus.Translation;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -214,7 +215,7 @@ public class GuiManager implements Listener {
             inv.setItem(53, new ItemStack(Material.BLACK_STAINED_GLASS_PANE));
             for (Wand wand : Wand.values()) {
                 ItemStack item = new ItemStack(wand.item);
-                item.editMeta(meta -> meta.displayName(Component.text(Translation.get(player.locale(), wand.translationKey())).decorate(TextDecoration.BOLD)));
+                item.editMeta(meta -> meta.displayName(Translation.component(player.locale(), wand.translationKey()).decorate(TextDecoration.BOLD)));
                 inv.addItem(item);
             }
         } else {

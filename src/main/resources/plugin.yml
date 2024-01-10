@@ -33,11 +33,6 @@ commands:
     usage: /<command>
     aliases: surrender
 
-  ## Configuration ##
-  config-wd:
-    usage: /<command> <operation> <?key?> <?value?>
-    aliases: settings-wd
-
 ######################################
 # Credits for all of the plugin code #
 ############### MarcPG ###############

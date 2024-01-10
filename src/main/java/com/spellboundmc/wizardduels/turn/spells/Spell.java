@@ -1,9 +1,8 @@
 package com.spellboundmc.wizardduels.turn.spells;
 
 import com.marcpg.text.Formatter;
-import com.spellboundmc.wizardduels.other.Translation;
 import com.spellboundmc.wizardduels.turn.Turn;
-import net.kyori.adventure.text.Component;
+import net.hectus.Translation;
 import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -46,7 +45,7 @@ public enum Spell implements Turn {
         ItemStack itemStack = new ItemStack(shop ? shopItem : Material.RED_STAINED_GLASS_PANE);
         itemStack.editMeta(meta -> {
             meta.displayName(itemStack.displayName().color(TextColor.color(160, shop ? 255 : 160, 160)));
-            if (shop) meta.lore(List.of(Component.text(Translation.get(player.locale(), "shop.price", price))));
+            if (shop) meta.lore(List.of(Translation.component(player.locale(), "shop.price", price)));
         });
         return itemStack;
     }
@@ -55,7 +54,7 @@ public enum Spell implements Turn {
     public @NotNull String text(Player player, boolean translated) {
         if (translated) {
             Locale l = player.locale();
-            return Translation.get(l, "spell.usage", player.getName(), Translation.get(l, translationKey()));
+            return Translation.string(l, "spell.usage", player.getName(), Translation.string(l, translationKey()));
         } else {
             return player.getName() + " used the " + Formatter.toPascalCase(name()) + " spell.";
         }

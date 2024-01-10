@@ -1,8 +1,8 @@
 package com.spellboundmc.wizardduels.turn.wands;
 
 import com.marcpg.text.Formatter;
-import com.spellboundmc.wizardduels.other.Translation;
 import com.spellboundmc.wizardduels.turn.Turn;
+import net.hectus.Translation;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
@@ -98,7 +98,7 @@ public enum Ability implements Turn {
     public @NotNull String text(Player player, boolean translated) {
         if (translated) {
             Locale l = player.locale();
-            return Translation.get(l, "wand.usage", player.getName(), Translation.get(l, translationKey()), Translation.get(l, "wand." + wand.name().toLowerCase()));
+            return Translation.string(l, "wand.usage", player.getName(), Translation.string(l, translationKey()), Translation.string(l, "wand." + wand.name().toLowerCase()));
         } else {
             return player.getName() + " used the " + Formatter.toPascalCase(name()) + " ability from the " + Formatter.toPascalCase(wand.name()) + " wand.";
         }
