@@ -2,13 +2,13 @@
 name: WizardDuels
 
 ### Plugin Description ###
-description: Plugin for the SpellBoundMC "Wizard Duels" game mode.
+description: Plugin for SpellBoundMC's "Wizard Duels" gamemode.
 
 ### Build Version ###
 version: '${version}'
 
 ### Main Class ###
-main: net.spellboundmc.wizardduels.WizardDuels
+main: com.spellboundmc.wizard_duels.WizardDuels
 
 ### PaperAPI Version ###
 api-version: '1.20'

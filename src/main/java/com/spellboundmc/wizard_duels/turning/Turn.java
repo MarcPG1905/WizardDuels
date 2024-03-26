@@ -1,4 +1,4 @@
-package com.spellboundmc.wizardduels.turn;
+package com.spellboundmc.wizard_duels.turning;
 
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;

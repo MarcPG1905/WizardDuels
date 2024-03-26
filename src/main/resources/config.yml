@@ -1,0 +1,4 @@
+postgresql:
+  url: jdbc:postgresql://localhost:5432/spellbound
+  user: username
+  passwd: password

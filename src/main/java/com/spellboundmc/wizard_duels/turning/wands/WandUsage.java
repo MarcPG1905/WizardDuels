@@ -1,12 +1,12 @@
-package com.spellboundmc.wizardduels.turn.wands;
+package com.spellboundmc.wizard_duels.turning.wands;
 
 import com.destroystokyo.paper.ParticleBuilder;
+import com.marcpg.lang.Translation;
 import com.marcpg.util.Randomizer;
-import com.spellboundmc.wizardduels.PlayerData;
-import com.spellboundmc.wizardduels.WizardDuels;
-import com.spellboundmc.wizardduels.match.Basic1v1;
-import com.spellboundmc.wizardduels.turn.TurnData;
-import net.hectus.Translation;
+import com.spellboundmc.wizard_duels.PlayerData;
+import com.spellboundmc.wizard_duels.WizardDuels;
+import com.spellboundmc.wizard_duels.match.Match;
+import com.spellboundmc.wizard_duels.turning.TurnData;
 import net.kyori.adventure.sound.SoundStop;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -36,55 +36,32 @@ import static org.bukkit.Material.AIR;
 import static org.bukkit.Material.END_STONE;
 import static org.bukkit.block.BlockFace.*;
 import static org.bukkit.entity.EntityType.*;
+import static org.bukkit.potion.PotionEffectType.*;
 
 public class WandUsage {
     public static final List<Class<? extends LivingEntity>> NECROMANCER_WAND_CREATURES = List.of(Zombie.class, Skeleton.class, Spider.class, Silverfish.class, Witch.class, Pillager.class, Guardian.class);
     public static final List<EntityType> NECROMANCER_WAND_CREATURE_TYPES = List.of(ZOMBIE, SKELETON, SPIDER, SILVERFISH, WITCH, PILLAGER, GUARDIAN);
     public static final Map<Material, Integer> SWORDS = Map.of(Material.IRON_SWORD, 30, Material.GOLDEN_SWORD, 30, Material.DIAMOND_SWORD, 25, Material.NETHERITE_SWORD, 10, Material.BOOK, 5);
     public static final Random RANDOM = new Random();
-    public static final Set<PotionEffectType> BAD_EFFECTS = Set.of(
-            PotionEffectType.SLOW,
-            PotionEffectType.SLOW_DIGGING,
-            PotionEffectType.HARM,
-            PotionEffectType.CONFUSION,
-            PotionEffectType.BLINDNESS,
-            PotionEffectType.WEAKNESS,
-            PotionEffectType.POISON,
-            PotionEffectType.LEVITATION,
-            PotionEffectType.DARKNESS
-    );
-    public static final Set<PotionEffectType> GOOD_EFFECTS = Set.of(
-            PotionEffectType.SPEED,
-            PotionEffectType.FAST_DIGGING,
-            PotionEffectType.INCREASE_DAMAGE,
-            PotionEffectType.HEAL,
-            PotionEffectType.JUMP,
-            PotionEffectType.REGENERATION,
-            PotionEffectType.DAMAGE_RESISTANCE,
-            PotionEffectType.FIRE_RESISTANCE,
-            PotionEffectType.INVISIBILITY,
-            PotionEffectType.NIGHT_VISION,
-            PotionEffectType.ABSORPTION
-    );
+    public static final PotionEffectType[] BAD_EFFECTS = new PotionEffectType[]{ SLOW, SLOW_DIGGING, HARM, CONFUSION, BLINDNESS, WEAKNESS, POISON, LEVITATION, DARKNESS };
+    public static final PotionEffectType[] GOOD_EFFECTS = new PotionEffectType[]{ SPEED, FAST_DIGGING, INCREASE_DAMAGE, HEAL, JUMP, REGENERATION, DAMAGE_RESISTANCE, FIRE_RESISTANCE, INVISIBILITY, NIGHT_VISION, ABSORPTION };
 
-    public static void wandUse(Ability ability, @NotNull Player player) {
+    public static void wandUse(Ability ability, @NotNull Player player, Match match) {
         Locale l = player.locale();
         Location loc = player.getLocation();
         World world = player.getWorld();
 
-        Basic1v1 match = (Basic1v1) WizardDuels.currentMatch;
-
         PlayerData playerData = match.getPlayerData(player);
         PlayerData opponentData = match.getOpponentData(player);
 
-        if (playerData.disabledWands) {
+        if (playerData.matchModifiers.contains("disabled_wands")) {
             player.sendMessage(Translation.component(l, "wand.error.disabled").color(NamedTextColor.RED));
             return;
         }
 
         if (playerData.abilityCooldowns.get(ability) >= 0) {
-            player.playSound(loc, Sound.ENTITY_VILLAGER_NO, 0.25f, 1.0f);
-            player.sendMessage("You're using your abilities too fast, cool down!");
+            player.playSound(player, Sound.ENTITY_VILLAGER_NO, 0.25f, 1.0f);
+            player.sendMessage(Component.text("You're using your abilities too fast, cool down!", NamedTextColor.RED));
             return;
         }
 
@@ -98,10 +75,8 @@ public class WandUsage {
             }
             case PRESSURE_WAVE -> {
                 player.playSound(loc, Sound.ENTITY_GENERIC_EXPLODE, 1.0f, 1.0f);
-
                 Vector velocity = player.getVelocity();
                 double launchVelocityY = Math.sqrt(b(playerData, 1, 2) * 2 * 0.08 * 15.0 * ((velocity.getY() / 2) + 1));
-
                 player.setVelocity(new Vector(velocity.getX(), launchVelocityY, velocity.getZ()));
             }
             case CREEPER_THROW -> {
@@ -111,21 +86,24 @@ public class WandUsage {
                 creeper.setVelocity(player.getEyeLocation().getDirection().normalize().multiply(b(playerData, 2.5, 4)));
             }
             case SUPER_BLAST -> {
+                double originalX = loc.getX();
+                double originalY = loc.getY();
+                double originalZ = loc.getZ();
+                double radius = b(playerData, 2, 3);
                 for (int i = 0; i < 360; i += 5) {
                     double angle = Math.toRadians(i);
-                    double radius = b(playerData, 2, 3);
-                    double x = loc.getX() + Math.cos(angle) * radius;
-                    double z = loc.getZ() + Math.sin(angle) * radius;
-                    Location particleLocation = new Location(world, x, loc.getY(), z);
+                    double x = originalX + Math.cos(angle) * radius;
+                    double z = originalZ + Math.sin(angle) * radius;
+                    Location particleLocation = new Location(world, x, originalY, z);
 
                     Particle.DustOptions dustOptions = new Particle.DustOptions(Color.RED, 1);
                     world.spawnParticle(Particle.REDSTONE, particleLocation, 1, 0, 0, 0, 1, dustOptions, true);
 
                     for (int j = 1; j <= 3; j++) {
                         double thickness = j * 0.1;
-                        x = loc.getX() + Math.cos(angle) * (radius + thickness);
-                        z = loc.getZ() + Math.sin(angle) * (radius + thickness);
-                        particleLocation = new Location(world, x, loc.getY(), z);
+                        x = originalX + Math.cos(angle) * (radius + thickness);
+                        z = originalZ + Math.sin(angle) * (radius + thickness);
+                        particleLocation = new Location(world, x, originalY, z);
                         world.spawnParticle(Particle.REDSTONE, particleLocation, 0, 0, 0, 0, 1, dustOptions, true);
                     }
                 }
@@ -135,9 +113,8 @@ public class WandUsage {
 
                     for (int x = -size; x <= (size - 1); x++) {
                         for (int z = -size; z <= (size - 1); z++) {
-                            Location tntLocation = loc.clone().add(x, 0, z);
-                            TNTPrimed tnt = world.spawn(tntLocation, TNTPrimed.class);
-                            tnt.setFuseTicks(b(playerData, 2, 3));
+                            world.spawn(loc.clone().add(x, 0, z), TNTPrimed.class)
+                                    .setFuseTicks(b(playerData, 2, 3));
                         }
                     }
                 }, 60);
@@ -150,6 +127,7 @@ public class WandUsage {
                 Location playerLocation = player.getEyeLocation();
                 for (int i = 1; i <= b(playerData, 10, 20); i++) {
                     Location spawnLocation = playerLocation.clone().add(playerLocation.getDirection().multiply(i / 2 + 3));
+                    spawnLocation.setY(loc.getY());
                     EvokerFangs evokerFang = world.spawn(spawnLocation, EvokerFangs.class);
                     evokerFang.setOwner(player);
                 }
@@ -157,19 +135,16 @@ public class WandUsage {
                 opponentData.player.stopSound(SoundStop.named(Sound.ENTITY_EVOKER_FANGS_ATTACK));
             }
             case ICE_ROAD -> {
-                match.ICY_FEET = player;
+                playerData.matchModifiers.add("icy_feet");
                 player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, b(playerData, 200, 400), 1));
-
-                Bukkit.getScheduler().runTaskLater(WizardDuels.getPlugin(WizardDuels.class), () -> match.ICY_FEET = null, 200L);
+                Bukkit.getScheduler().runTaskLater(WizardDuels.getPlugin(WizardDuels.class), () -> playerData.matchModifiers.remove("icy_feet"), 200L);
             }
             case FREEZE -> {
-                match.OPPONENTS_NO_MOVEMENT = player;
-                Bukkit.getScheduler().runTaskLater(WizardDuels.getPlugin(WizardDuels.class), () -> match.OPPONENTS_NO_MOVEMENT = null, b(playerData, 100, 200));
+                opponentData.matchModifiers.add("frozen");
+                Bukkit.getScheduler().runTaskLater(WizardDuels.getPlugin(WizardDuels.class), () -> opponentData.matchModifiers.remove("frozen"), b(playerData, 100, 200));
             }
             case ICE_STORM -> {
-                match.ICE_STORM = player;
-                Bukkit.getScheduler().runTaskLater(WizardDuels.getPlugin(WizardDuels.class), () -> match.ICE_STORM = null, 200L);
-
+                playerData.matchModifiers.add("ice_storm");
                 new BukkitRunnable() {
                     double angle = 0;
                     double duration = 0;
@@ -179,7 +154,7 @@ public class WandUsage {
                         player.playSound(player.getLocation(), Sound.ENTITY_HORSE_BREATHE, 0.5f, 1.0f);
 
                         if (duration >= 10) {
-                            match.ICE_STORM = null;
+                            playerData.matchModifiers.remove("ice_storm");
                             cancel();
                         }
 
@@ -269,7 +244,7 @@ public class WandUsage {
             case CRYSTAL_SHIELD -> {
                 Location randomLocation = getRandomLocation(loc, b(playerData, 10, 15));
                 world.spawn(randomLocation, EnderCrystal.class);
-                playerData.wandCrystalActive = true;
+                playerData.matchModifiers.add("wand_crystal");
                 player.setNoDamageTicks(99999);
             }
 
@@ -337,6 +312,7 @@ public class WandUsage {
                 player.playSound(loc, Sound.ENTITY_GHAST_SCREAM, 1.0f, 1.0f);
                 new BukkitRunnable() {
                     int secsLeft = RANDOM.nextInt(6, 11) * b(playerData, 1, 2);
+
                     @Override
                     public void run() {
                         player.launchProjectile(Fireball.class);
@@ -348,8 +324,8 @@ public class WandUsage {
             }
             case FIRE_RING -> {
                 player.playSound(loc, Sound.ITEM_FLINTANDSTEEL_USE, 1.5f, 1.0f);
-                match.FIRE_RING = player;
-                Bukkit.getScheduler().runTaskLater(WizardDuels.getPlugin(WizardDuels.class), () -> match.FIRE_RING = null, b(playerData, 200, 300));
+                playerData.matchModifiers.add("fire_ring");
+                Bukkit.getScheduler().runTaskLater(WizardDuels.getPlugin(WizardDuels.class), () -> playerData.matchModifiers.remove("fire_ring"), b(playerData, 200, 300));
             }
 
             // ============ WEATHER ============
@@ -368,6 +344,7 @@ public class WandUsage {
 
                 new BukkitRunnable() {
                     private int ticks = 0;
+
                     @Override
                     public void run() {
                         Location horseLoc = horse.getLocation();
@@ -400,6 +377,7 @@ public class WandUsage {
             // TODO: ===== TIME WARP ===========
             case TIME_FREEZE -> new BukkitRunnable() {
                 private int counter;
+
                 @Override
                 public void run() {
                     generate3dBall(player.getLocation(), 8.0, 30, location -> new ParticleBuilder(Particle.REDSTONE).color(255, 255, 0).location(location).spawn());
@@ -416,7 +394,7 @@ public class WandUsage {
                 }
             }.runTaskTimer(WizardDuels.getPlugin(WizardDuels.class), 1, 1);
             case CTRL_Z -> {
-                Location timeDestination = playerData.locationQueue.get(5);
+                Location timeDestination = playerData.lastLocations.get(5);
                 if (timeDestination == null) {
                     player.sendMessage(Translation.component(l, "wand.time.time_error").color(NamedTextColor.RED));
                     return;
@@ -425,6 +403,7 @@ public class WandUsage {
             }
             case PARADOX_SHIELD -> new BukkitRunnable() {
                 private int counter;
+
                 @Override
                 public void run() {
                     generate3dBall(player.getLocation(), 4.0, 30, location -> new ParticleBuilder(Particle.REDSTONE).color(255, 255, 0).location(location).spawn());
@@ -448,6 +427,7 @@ public class WandUsage {
                 }
             }.runTaskTimer(WizardDuels.getPlugin(WizardDuels.class), 1, 2);
             case CLONE -> {
+                // TODO: Time Warp Clone Ability
                 // Clone the player 2 blocks before him
                 // Mimic the player's movements 1:1
             }
@@ -462,12 +442,12 @@ public class WandUsage {
                 });
             }
             case LOW_GRAVITY -> {
-                match.NO_GRAVITATION = player;
+                playerData.matchModifiers.add("no_gravity");
                 player.setGravity(false);
 
                 Bukkit.getScheduler().runTaskLater(WizardDuels.getPlugin(WizardDuels.class), () -> {
                     player.setGravity(true);
-                    match.NO_GRAVITATION = null;
+                    playerData.matchModifiers.remove("no_gravity");
                     player.setNoDamageTicks(40);
                 }, b(playerData, 200, 300));
             }
@@ -535,25 +515,17 @@ public class WandUsage {
                 leftSnowball.setVelocity(player.getVelocity());
             }
             case SWORD_STAB -> {
-                ItemStack sword = new ItemStack(Material.IRON_SWORD);
-
                 int randomValue = new Random().nextInt(100);
                 int cumulativeWeight = 0;
+                ItemStack sword;
                 for (Map.Entry<Material, Integer> entry : SWORDS.entrySet()) {
                     cumulativeWeight += entry.getValue();
                     if (randomValue < cumulativeWeight) {
                         sword = new ItemStack(entry.getKey());
-
-                        if (entry.getKey() == Material.BOOK) sword.addEnchantment(Enchantment.DAMAGE_ALL, 3);
+                        if (entry.getKey() == Material.BOOK)
+                            sword.addEnchantment(Enchantment.DAMAGE_ALL, 3);
                     }
                 }
-
-                Snowball ball = player.launchProjectile(Snowball.class);
-                ball.setItem(sword);
-
-                ball.teleport(opponentData.player.getLocation().add(0, 2, 0));
-                Vector velocity = new Vector(0, -0.1, 0);
-                ball.setVelocity(velocity);
             }
             case SWORD_HORDE -> {
                 // TODO: Add the factor of the wand level
@@ -570,7 +542,7 @@ public class WandUsage {
                 Location lightning = getRandomLocation(loc, 10);
                 world.spawn(lightning, LightningStrike.class);
 
-                Bukkit.getScheduler().runTaskLater(WizardDuels.getPlugin(WizardDuels.class), () -> {
+                Bukkit.getScheduler().runTaskLater(WizardDuels.PLUGIN, () -> {
                     world.spawn(getRandomLocation(lightning, 1), LightningStrike.class);
                     world.spawn(getRandomLocation(lightning, 1), LightningStrike.class);
                 }, 20L);
@@ -601,7 +573,7 @@ public class WandUsage {
                     duration++;
                     if (duration >= b(playerData, 200, 300)) cancel();
                 }
-            }.runTaskTimer(WizardDuels.getPlugin(WizardDuels.class), 0, 1);
+            }.runTaskTimer(WizardDuels.PLUGIN, 0, 1);
             case ELECTRO_PHANTOMS -> {
                 for (int i = 0; i < b(playerData, 3, 6); i++) {
                     Phantom phantom = world.spawn(loc, Phantom.class);
@@ -665,7 +637,7 @@ public class WandUsage {
                             cancel();
                         }
                     }
-                }.runTaskTimer(WizardDuels.getPlugin(WizardDuels.class), 0, 10);
+                }.runTaskTimer(WizardDuels.PLUGIN, 0, 10);
             }
 
             // ============= VENOM =============
@@ -707,12 +679,12 @@ public class WandUsage {
                     skeleton.addScoreboardTag("venomous");
                     skeleton.setTarget(opponentData.player);
                 }
-                match.POISON_SKELETONS = player;
+                playerData.matchModifiers.add("poison_skeletons");
 
                 new BukkitRunnable() {
                     @Override
                     public void run() {
-                        if (match.POISON_SKELETONS == null) cancel();
+                        if (!playerData.matchModifiers.contains("poison_skeletons")) cancel();
 
                         for (LivingEntity entity : world.getLivingEntities()) {
                             if (entity.getScoreboardTags().contains("venomous")) {
@@ -725,7 +697,7 @@ public class WandUsage {
                             }
                         }
                     }
-                }.runTaskTimer(WizardDuels.getPlugin(WizardDuels.class), 0, 20);
+                }.runTaskTimer(WizardDuels.PLUGIN, 0, 20);
             }
 
             // =========== DARK WAND ===========
@@ -749,7 +721,7 @@ public class WandUsage {
             case BLACK_DEATH -> {
                 Location spawnLoc = loc.clone();
 
-                Bukkit.getScheduler().runTaskLater(WizardDuels.getPlugin(WizardDuels.class), () -> {
+                Bukkit.getScheduler().runTaskLater(WizardDuels.PLUGIN, () -> {
                     int radius = 3;
 
                     for (int x = -radius; x <= radius; x++) {
@@ -787,7 +759,7 @@ public class WandUsage {
                 if (Randomizer.boolByChance(80)) {
                     List<Ability> abilities = new ArrayList<>(Arrays.stream(Ability.values()).toList());
                     abilities.remove(Ability.GLITCH);
-                    wandUse(Randomizer.fromCollection(abilities), player);
+                    wandUse(Randomizer.fromCollection(abilities), player, match);
                 } else {
                     player.playSound(player, Sound.BLOCK_GLASS_BREAK, 0.5f, 0.8f);
                     player.sendMessage(Translation.component(l, "wand.glitch.lmb.fail").color(NamedTextColor.YELLOW));
@@ -806,10 +778,10 @@ public class WandUsage {
             }
             case VIRUS -> {
                 int seconds = specialRandom10();
-                opponentData.disabledWands = true;
+                opponentData.matchModifiers.add("disabled_wands");
                 opponentData.player.showTitle(Title.title(Component.empty(), Translation.component(l, "wand.glitch.slmb.opponent_title", seconds).color(NamedTextColor.RED), Title.Times.times(Duration.ZERO, Duration.ofSeconds(seconds / 2), Duration.ZERO)));
-                Bukkit.getScheduler().runTaskLater(WizardDuels.getPlugin(WizardDuels.class), () -> {
-                    opponentData.disabledWands = false;
+                Bukkit.getScheduler().runTaskLater(WizardDuels.PLUGIN, () -> {
+                    opponentData.matchModifiers.remove("disabled_wands");
                     opponentData.player.sendMessage(Translation.component(l, "wand.glitch.slmb.opponent_end").color(NamedTextColor.GREEN));
                 }, seconds * 20L);
             }
@@ -851,8 +823,8 @@ public class WandUsage {
                 TNTPrimed tnt = world.spawn(block.getLocation(), TNTPrimed.class);
                 tnt.setFuseTicks(1);
             }, hitEntity -> hitEntity.setNoActionTicks(200), hitPlayer -> {
-                opponentData.disabledWands = true;
-                Bukkit.getScheduler().runTaskLater(WizardDuels.getPlugin(WizardDuels.class), () -> opponentData.disabledWands = false, 100);
+                opponentData.matchModifiers.add("disabled_wands");
+                Bukkit.getScheduler().runTaskLater(WizardDuels.PLUGIN, () -> opponentData.matchModifiers.remove("disabled_wands"), 100);
             });
 
             // ========= REDSTONE WAND =========
@@ -871,15 +843,15 @@ public class WandUsage {
                 // Make 3x3 wall of dispensers that constantly shoot
             }
             case POWER_BOOST -> {
-                playerData.boostedAbilities = true;
-                Bukkit.getScheduler().runTaskLater(WizardDuels.getPlugin(WizardDuels.class), () -> playerData.boostedAbilities = false, RANDOM.nextLong(100, 180));
+                opponentData.matchModifiers.add("boosted_abilities");
+                Bukkit.getScheduler().runTaskLater(WizardDuels.PLUGIN, () -> playerData.matchModifiers.remove("boosted_abilities"), RANDOM.nextLong(100, 180));
             }
-            
+
             // ========= POTION MASTER =========
             case LITTLE_ACCIDENT -> {
                 ThrownPotion potion = player.launchProjectile(ThrownPotion.class);
                 PotionMeta meta = potion.getPotionMeta();
-                meta.addCustomEffect(new PotionEffect(Randomizer.fromCollection(BAD_EFFECTS), 10, 0), true);
+                meta.addCustomEffect(new PotionEffect(Randomizer.fromArray(BAD_EFFECTS), 10, 0), true);
                 meta.setColor(Color.WHITE);
                 potion.setPotionMeta(meta);
             }
@@ -902,7 +874,7 @@ public class WandUsage {
             case ORANGE_JUICE -> {
                 ThrownPotion potion = player.launchProjectile(ThrownPotion.class);
                 PotionMeta meta = potion.getPotionMeta();
-                meta.addCustomEffect(new PotionEffect(Randomizer.fromCollection(GOOD_EFFECTS), 10, 0), true);
+                meta.addCustomEffect(new PotionEffect(Randomizer.fromArray(GOOD_EFFECTS), 10, 0), true);
                 meta.setColor(Color.WHITE);
                 potion.setPotionMeta(meta);
             }
@@ -911,12 +883,13 @@ public class WandUsage {
     }
 
     @Contract(pure = true)
-    private static int b(@NotNull PlayerData p, int o, int b) {
-        return p.boostedAbilities ? b : o;
+    private static int b(@NotNull PlayerData player, int original, int boosted) {
+        return player.matchModifiers.contains("boosted_abilities") ? boosted : original;
     }
+
     @Contract(pure = true)
-    private static double b(@NotNull PlayerData p, double o, double b) {
-        return p.boostedAbilities ? b : o;
+    private static double b(@NotNull PlayerData player, double original, double boosted) {
+        return player.matchModifiers.contains("boosted_abilities") ? boosted : original;
     }
 
     public static @NotNull Location getRandomLocation(@NotNull Location center, int radius) {

@@ -1,15 +1,14 @@
-package com.spellboundmc.wizardduels.turn.spells;
+package com.spellboundmc.wizard_duels.turning.spells;
 
 import com.destroystokyo.paper.event.player.PlayerLaunchProjectileEvent;
-import com.spellboundmc.wizardduels.PlayerData;
-import com.spellboundmc.wizardduels.WizardDuels;
-import com.spellboundmc.wizardduels.match.Basic1v1;
-import com.spellboundmc.wizardduels.turn.wands.WandUsage;
+import com.spellboundmc.wizard_duels.PlayerData;
+import com.spellboundmc.wizard_duels.match.Match;
+import com.spellboundmc.wizard_duels.match.MatchManager;
+import com.spellboundmc.wizard_duels.turning.wands.WandUsage;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Fireball;
-import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
@@ -23,7 +22,7 @@ import org.jetbrains.annotations.NotNull;
 public class SpellEvents implements Listener {
     @EventHandler
     public void onBlockPlace(@NotNull BlockPlaceEvent event) {
-        if (WizardDuels.currentMatch == null) return;
+        if (MatchManager.getMatchByPlayer(event.getPlayer()) == null) return;
 
         event.setCancelled(true);
 
@@ -38,43 +37,43 @@ public class SpellEvents implements Listener {
 
     @EventHandler
     public void onBlockBreak(@NotNull BlockBreakEvent event) {
-        if (WizardDuels.currentMatch == null) return;
+        Match match = MatchManager.getMatchByPlayer(event.getPlayer());
+        if (match == null) return;
 
-        Basic1v1 match = (Basic1v1) WizardDuels.currentMatch;
         PlayerData playerData = match.getPlayerData(event.getPlayer());
         PlayerData opponentData = match.getOpponentData(event.getPlayer());
 
         if (event.getBlock().getType() == Material.DARK_PRISMARINE) {
-            playerData.thunderEffect = false;
-            opponentData.thunderEffect = false;
+            playerData.matchModifiers.remove("thunder");
+            opponentData.matchModifiers.remove("thunder");
             event.getPlayer().getWorld().setThundering(false);
             event.getPlayer().getWorld().setStorm(false);
         } else if (event.getBlock().getType() == Material.SPAWNER) {
-            playerData.constantSpawning = false;
+            playerData.matchModifiers.remove("constant_spawning");
+            opponentData.matchModifiers.remove("constant_spawning");
         } else {
             event.setCancelled(true);
         }
     }
 
     @EventHandler
-    public void onPlayerMove(PlayerMoveEvent event) {
-        if (WizardDuels.currentMatch == null) return;
+    public void onPlayerMove(@NotNull PlayerMoveEvent event) {
+        Match match = MatchManager.getMatchByPlayer(event.getPlayer());
+        if (match == null) return;
 
-        Basic1v1 match = (Basic1v1) WizardDuels.currentMatch;
-        Player player = event.getPlayer();
-        PlayerData playerData = match.getPlayerData(player);
+        PlayerData playerData = match.getPlayerData(event.getPlayer());
 
-        if (playerData.cobwebCenter != null) {
+        if (playerData.matchProperties.containsKey("cobweb_center")) {
             if (event.getFrom().getBlock().getType() == Material.COBWEB && event.getTo().getBlock().getType() != Material.COBWEB) {
-                if (playerData.cobwebCenter.distance(event.getFrom()) < playerData.cobwebCenter.distance(event.getTo())) {
+                if (((Location) playerData.matchProperties.get("cobweb_center")).distance(event.getFrom()) < ((Location) playerData.matchProperties.get("cobweb_center")).distance(event.getTo())) {
                     WandUsage.generate3dBall(playerData.player.getLocation(), 3.5, 64, location -> {
                         if (location.getBlock().getType() == Material.COBWEB) {
                             location.getBlock().setType(Material.AIR);
                         }
                     });
-                    playerData.cobwebCenter = null;
-                    player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 600, 0));
-                    match.getOpponentData(player).spellCooldowns.put(Spell.getSpellPlaced(Material.COBWEB), 50);
+                    playerData.matchProperties.remove("cobweb_center");
+                    playerData.player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 600, 0));
+                    match.getOpponentData(playerData.player).spellCooldowns.put(Spell.getSpellPlaced(Material.COBWEB), 50);
                 }
             }
         }
@@ -82,27 +81,26 @@ public class SpellEvents implements Listener {
 
     @EventHandler
     public void onProjectileHit(@NotNull PlayerLaunchProjectileEvent event) {
-        if (WizardDuels.currentMatch == null) return;
+        Match match = MatchManager.getMatchByPlayer(event.getPlayer());
+        if (match == null) return;
 
-        Basic1v1 match = (Basic1v1) WizardDuels.currentMatch;
         if (event.getProjectile() instanceof Fireball) {
             PlayerData playerData = match.getPlayerData(event.getPlayer());
 
-            if (playerData.fireballsLeft >= 0) {
-                playerData.fireballsLeft--;
+            if ((Integer) playerData.matchProperties.get("fireballs_left") >= 0) {
+                playerData.matchProperties.put("fireballs_left", (Integer) playerData.matchProperties.get("fireballs_left") + 1);
                 Location loc = playerData.player.getLocation();
                 loc.getWorld().spawn(loc.add(loc.getDirection().multiply(1)), Fireball.class);
 
-                if (playerData.fireballsLeft < 0) {
+                if ((Integer) playerData.matchProperties.get("fireballs_left") < 0) {
                     playerData.spellCooldowns.put(Spell.NETHERRACK, 15);
                 }
-            } else if (match.getOpponentData(event.getPlayer()).fireballsLeft >= 0) {
+            } else if ((Integer) match.getOpponentData(event.getPlayer()).matchProperties.get("fireballs_left") >= 0) {
                 event.setCancelled(true);
             }
         }
     }
 
-    // Preventing lava and water from flowing
     @EventHandler
     public void onBlockFromTo(@NotNull BlockFromToEvent event) {
         if (event.getBlock().isLiquid()) event.setCancelled(true);

@@ -1,12 +1,10 @@
-package com.spellboundmc.wizardduels.other;
+package com.spellboundmc.wizard_duels;
 
-import com.spellboundmc.wizardduels.PlayerData;
-import com.spellboundmc.wizardduels.WizardDuels;
-import com.spellboundmc.wizardduels.match.Basic1v1;
-import com.spellboundmc.wizardduels.match.Match;
-import com.spellboundmc.wizardduels.turn.spells.Spell;
-import com.spellboundmc.wizardduels.turn.wands.Wand;
-import net.hectus.Translation;
+import com.marcpg.lang.Translation;
+import com.spellboundmc.wizard_duels.match.Match;
+import com.spellboundmc.wizard_duels.match.MatchManager;
+import com.spellboundmc.wizard_duels.turning.spells.Spell;
+import com.spellboundmc.wizard_duels.turning.wands.Wand;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -38,90 +36,85 @@ public class GuiManager implements Listener {
 
     @EventHandler
     public void onInventoryClick(@NotNull InventoryClickEvent event) {
-        if (WizardDuels.currentMatch == null) return;
-        if (Objects.requireNonNull(event.getCurrentItem()).getType() == Material.LIGHT_GRAY_STAINED_GLASS) return;
+        if (event.getCurrentItem() == null) return;
+        if (Objects.requireNonNull(event.getCurrentItem()).getType().name().endsWith("_STAINED_GLASS_PANE")) return;
+
+        Player player = (Player) event.getWhoClicked();
+        Match match = MatchManager.getMatchByPlayer(player);
+        if (match == null) return;
 
         String title = ((TextComponent) event.getView().title()).content().toLowerCase();
 
-        Basic1v1 match = (Basic1v1) WizardDuels.currentMatch;
         if (title.contains("choose")) {
             event.setCancelled(true);
-            switch (match.prePhase) {
-                case TIME_OF_DAY -> WizardDuels.WORLD.setTime(switch (event.getSlot()) {
+
+            switch (match.settingPhase) {
+                case TIME_OF_DAY -> match.world.setTime(switch (event.getSlot()) {
                     case 1 -> 23500;
                     case 2 -> 6000;
-                    case 3 -> 10500;
                     case 5 -> 12500;
                     case 6 -> 15000;
                     case 7 -> 18000;
-                    default -> throw new IllegalStateException("Unexpected value: " + event.getSlot());
+                    default -> 10500;
                 });
-                case MAP_SIZE -> match.mapSize = switch (event.getSlot()) {
+                case MAP_SIZE -> match.size = switch (event.getSlot()) {
                     case 2 -> Match.MapSize.MINI;
                     case 3 -> Match.MapSize.SMALL;
-                    case 4 -> Match.MapSize.NORMAL;
                     case 5 -> Match.MapSize.BIG;
                     case 6 -> Match.MapSize.HUGE;
-                    default -> throw new IllegalStateException("Unexpected value: " + event.getSlot());
+                    default -> Match.MapSize.NORMAL;
                 };
                 case TOKEN_AMOUNT -> {
                     int tokens = switch (event.getSlot()) {
                         case 2 -> 15;
                         case 3 -> 25;
-                        case 5 -> 35;
                         case 6 -> 50;
-                        default -> throw new IllegalStateException("Unexpected value: " + event.getSlot());
+                        default -> 35;
                     };
-                    match.getPlayerData1().tokens = tokens;
-                    match.getPlayerData2().tokens = tokens;
+                    match.players.left().setTokens(tokens);
+                    match.players.right().setTokens(tokens);
                 }
                 case WEATHER -> {
                     switch (event.getSlot()) {
-                        case 2 -> WizardDuels.WORLD.setStorm(true);
-                        case 4 -> {
-                            WizardDuels.WORLD.setStorm(false);
-                            WizardDuels.WORLD.setClearWeatherDuration(Integer.MAX_VALUE);
-                        }
+                        case 2 -> match.world.setStorm(true);
                         case 6 -> {
-                            WizardDuels.WORLD.setStorm(true);
-                            WizardDuels.WORLD.setThunderDuration(Integer.MAX_VALUE);
-                            WizardDuels.WORLD.setThundering(true);
+                            match.world.setStorm(true);
+                            match.world.setThunderDuration(Integer.MAX_VALUE);
+                            match.world.setThundering(true);
+                        }
+                        default -> {
+                            match.world.setStorm(false);
+                            match.world.setClearWeatherDuration(Integer.MAX_VALUE);
                         }
                     }
-
-                    startShopDisplay(match.getPlayer1(), match.getPlayerData1());
-                    startShopDisplay(match.getPlayer2(), match.getPlayerData2());
+                    startShopDisplay(match);
 
                     new BukkitRunnable() {
                         int secsLeft = 60;
                         @Override
                         public void run() {
-                            match.getPlayer1().getInventory().setItem(14, new ItemStack(Material.IRON_NUGGET, secsLeft));
-                            match.getPlayer2().getInventory().setItem(14, new ItemStack(Material.IRON_NUGGET, secsLeft));
+                            match.players.left().player.getInventory().setItem(14, new ItemStack(Material.IRON_NUGGET, secsLeft));
+                            match.players.right().player.getInventory().setItem(14, new ItemStack(Material.IRON_NUGGET, secsLeft));
                             secsLeft--;
                             if (secsLeft <= 0) {
-                                WizardDuels.currentMatch.startMain();
+                                match.start();
                                 cancel();
                             }
                         }
                     }.runTaskTimer(WizardDuels.PLUGIN, 0, 20);
-
                     return;
                 }
             }
-            match.nextPrePhase();
+            match.prePhase();
         } else if (title.contains("shop")) {
             event.setCancelled(true);
 
             Material item = event.getCurrentItem().getType();
-            if (item == Material.BLACK_STAINED_GLASS_PANE) return;
-
-            Player player = (Player) event.getWhoClicked();
 
             if (title.contains("wands")) {
                 if (item == Material.DIRT) {
                     displayShop(player, false, 1);
-                } else if (item != Material.STICK && item != Material.AIR) {
+                } else if (item != Material.STICK && !item.isEmpty()) {
                     Wand wand = Wand.getWand(item);
                     if (wand != null) {
                         player.getInventory().setItem(0, new ItemStack(wand.item));
@@ -137,24 +130,22 @@ public class GuiManager implements Listener {
                     displayShop(player, false, currentPage + 1);
                 } else if (item == Material.RED_DYE) {
                     displayShop(player, false, Math.max(1, currentPage - 1));
-                } else if (item != Material.DIRT && item != Material.AIR) {
+                } else if (item != Material.DIRT && !item.isEmpty()) {
                     Spell spell = Spell.getSpellShop(item);
                     if (spell != null) {
                         PlayerData playerData = match.getPlayerData(player);
-
-                        if (playerData.tokens >= spell.price && (player.getInventory().getItem(7) == null || Objects.requireNonNull(player.getInventory().getItem(7)).isEmpty())) {
-                            playerData.tokens -= spell.price;
+                        if (playerData.tokens() >= spell.price && (player.getInventory().getItem(7) == null || Objects.requireNonNull(player.getInventory().getItem(7)).isEmpty())) {
+                            playerData.setTokens(playerData.tokens() - spell.price);
                             player.getInventory().addItem(new ItemStack(spell.shopItem));
-                            playerData.spells.add(spell);
+                            playerData.selectedSpells.add(spell);
+
                             player.playSound(player, Sound.ENTITY_VILLAGER_YES, 1.0f, 1.0f);
-                            player.getInventory().setItem(12, new ItemStack(Material.GOLD_NUGGET, playerData.tokens));
+                            player.getInventory().setItem(12, new ItemStack(Material.GOLD_NUGGET, playerData.tokens()));
 
                             if (player.getInventory().getItem(7) != null || !Objects.requireNonNull(player.getInventory().getItem(7)).isEmpty()) {
-                                playerData.shopDone = true;
-                                if (match.getOpponentData(player).shopDone) WizardDuels.currentMatch.startMain();
+                                playerData.setShopDone(true);
+                                if (match.getOpponentData(player).shopDone()) match.start();
                             }
-                        } else {
-                            player.playSound(player, Sound.ENTITY_VILLAGER_NO, 1.0f, 1.0f);
                         }
                     }
                 }
@@ -164,27 +155,10 @@ public class GuiManager implements Listener {
 
     @EventHandler
     public void onInventoryClose(@NotNull InventoryCloseEvent event) {
-        if (WizardDuels.currentMatch == null) return;
-        if (event.getReason() != InventoryCloseEvent.Reason.PLAYER) return;
+        if (MatchManager.getMatchByPlayer((Player) event.getPlayer()) == null) return;
+        if (event.getReason() == InventoryCloseEvent.Reason.PLUGIN) return;
 
         Bukkit.getScheduler().runTaskLater(WizardDuels.PLUGIN, () -> event.getPlayer().openInventory(event.getInventory()), 3L);
-    }
-
-    public static void createInv(Player player, int rows, int @NotNull [] emptySpots, String title, ItemStack... items) {
-        Inventory inv = Bukkit.createInventory(player, rows * 9, Component.text(title));
-        for (int emptySpot : emptySpots) {
-            inv.setItem(emptySpot, new ItemStack(Material.LIGHT_GRAY_STAINED_GLASS_PANE));
-        }
-        inv.addItem(items);
-        player.closeInventory(InventoryCloseEvent.Reason.PLUGIN);
-        player.openInventory(inv);
-    }
-
-    public static void startShopDisplay(Player player, @NotNull PlayerData playerData) {
-        displayShop(player, true, 1);
-        player.getInventory().setItem(8, new ItemStack(Material.STONE_SWORD));
-        player.getInventory().setItem(0, new ItemStack(Material.GRAY_STAINED_GLASS_PANE));
-        player.getInventory().setItem(12, new ItemStack(Material.GOLD_NUGGET, playerData.tokens));
     }
 
     private static final int[] EMPTY_SPOTS = { 0, 1, 2, 4, 6, 7, 8, 9, 17, 18, 26, 27, 35, 36, 44, 46, 47, 48, 49, 50, 51, 52 };
@@ -202,6 +176,26 @@ public class GuiManager implements Listener {
         });
     }
 
+    public static void createInv(Player player, int rows, int @NotNull [] emptySpots, String title, ItemStack... items) {
+        Inventory inv = Bukkit.createInventory(player, rows * 9, Component.text(title));
+        for (int emptySpot : emptySpots) {
+            inv.setItem(emptySpot, new ItemStack(Material.LIGHT_GRAY_STAINED_GLASS_PANE));
+        }
+        inv.addItem(items);
+        player.closeInventory(InventoryCloseEvent.Reason.PLUGIN);
+        player.openInventory(inv);
+    }
+
+    public static void startShopDisplay(@NotNull Match match) {
+        match.players.both(o -> {
+            Player player = ((PlayerData) o).player;
+            displayShop(player, true, 1);
+            player.getInventory().setItem(8, new ItemStack(Material.STONE_SWORD));
+            player.getInventory().setItem(0, new ItemStack(Material.GRAY_STAINED_GLASS_PANE));
+            player.getInventory().setItem(12, new ItemStack(Material.GOLD_NUGGET, ((PlayerData) o).tokens()));
+        });
+    }
+
     public static void displayShop(Player player, boolean wands, int page) {
         Inventory inv = Bukkit.createInventory(player, 54, Component.text("Shop - " + (wands ? "Wands" : "Spells - Page " + page)));
         for (int i : EMPTY_SPOTS) {
@@ -210,24 +204,24 @@ public class GuiManager implements Listener {
 
         inv.addItem(WANDS_ITEM, SPELLS_ITEM);
 
-        if (wands) {
-            inv.setItem(45, new ItemStack(Material.BLACK_STAINED_GLASS_PANE));
-            inv.setItem(53, new ItemStack(Material.BLACK_STAINED_GLASS_PANE));
-            for (Wand wand : Wand.values()) {
-                ItemStack item = new ItemStack(wand.item);
-                item.editMeta(meta -> meta.displayName(Translation.component(player.locale(), wand.translationKey()).decorate(TextDecoration.BOLD)));
-                inv.addItem(item);
-            }
-        } else {
-            inv.setItem(45, new ItemStack(page == 1 ? Material.BLACK_STAINED_GLASS_PANE : Material.RED_DYE));
-            inv.setItem(53, new ItemStack(((double) Spell.values().length / 28 > (double) page) ? Material.LIME_DYE : Material.BLACK_STAINED_GLASS_PANE));
+         if (wands) {
+             inv.setItem(45, new ItemStack(Material.BLACK_STAINED_GLASS_PANE));
+             inv.setItem(53, new ItemStack(Material.BLACK_STAINED_GLASS_PANE));
+             for (Wand wand : Wand.values()) {
+                 ItemStack item = new ItemStack(wand.item);
+                 item.editMeta(meta -> meta.displayName(Translation.component(player.locale(), wand.translationKey()).decorate(TextDecoration.BOLD)));
+                 inv.addItem(item);
+             }
+         } else {
+             inv.setItem(45, new ItemStack(page == 1 ? Material.BLACK_STAINED_GLASS_PANE : Material.RED_DYE));
+             inv.setItem(53, new ItemStack(((double) Spell.values().length / 28 > (double) page) ? Material.LIME_DYE : Material.BLACK_STAINED_GLASS_PANE));
 
-            getPage(Spell.values(), page, 28);
+             getPage(Spell.values(), page, 28);
 
-            for (Spell spell : getPage(Spell.values(), page, 28)) {
-                inv.addItem(spell.getItem(player));
-            }
-        }
+             for (Spell spell : getPage(Spell.values(), page, 28)) {
+                 inv.addItem(spell.getItem(player));
+             }
+         }
         player.closeInventory(InventoryCloseEvent.Reason.PLUGIN);
         player.openInventory(inv);
     }
